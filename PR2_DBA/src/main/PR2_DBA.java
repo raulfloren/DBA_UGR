@@ -18,7 +18,7 @@ public class PR2_DBA {
 
         String mapName = "resources/maps/" + args[0];
         
-        
+        //Esto es una prueba de pr
 
         try {
             // Cargar mapa desde archivo
