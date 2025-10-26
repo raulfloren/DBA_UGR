@@ -4,35 +4,34 @@ package GUI;
  *
  * @author floren
  */
-import action.Actions;
+import movimientos.Movimientos;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimerTask;
 
-public class AgentSimulationGUI extends JFrame {
+public class SimulacionAgenteGUI extends JFrame {
 
     private int[][] matriz;
     private JTextArea textAreaTraza;
     private JPanel panelMatriz;
 
-    private final static int AGENTE = 9, OBJETIVO = 8, MURO = -1, SUELO = 0, SUELO1 = 1, SUELO2 = 2, SUELO3 = 3;
+    private final static int MURO = -1, SUELO = 0, AGENTE = 9, OBJETIVO = 8;
 
-    private Actions direccionAgente;
-    private Map<Actions, Image> imagenesAgente;
+    private Movimientos direccionAgente;
+    private Map<Movimientos, Image> imagenesAgente;
     private Map<Integer, Image> imagenes;
 
-    public AgentSimulationGUI(String textoInicial, int[][] matriz, Actions direccionAgente) {
+    public SimulacionAgenteGUI(String textoInicial, int[][] matriz, Movimientos direccionAgente) {
         this.matriz = matriz;
         this.direccionAgente = direccionAgente;
         cargarImagenes();
         inicializarComponentes(textoInicial);
     }
 
-    public AgentSimulationGUI() {
+    public SimulacionAgenteGUI() {
         this.matriz = null;
         this.direccionAgente = null;
         cargarImagenes();
@@ -46,28 +45,19 @@ public class AgentSimulationGUI extends JFrame {
         imagenes = new HashMap<>();
         try {
             imagenes.put(SUELO, ImageIO.read(getClass().getResource("/assets/SUELO.png")));
-            imagenes.put(SUELO1, ImageIO.read(getClass().getResource("/assets/SUELO1.png")));
-            imagenes.put(SUELO2, ImageIO.read(getClass().getResource("/assets/SUELO2.png")));
-            imagenes.put(SUELO3, ImageIO.read(getClass().getResource("/assets/SUELO3.png")));
             imagenes.put(MURO, ImageIO.read(getClass().getResource("/assets/MURO.png")));
             imagenes.put(OBJETIVO, ImageIO.read(getClass().getResource("/assets/OBJETIVO.png")));
-            imagenesAgente.put(Actions.AR, ImageIO.read(getClass().getResource("/assets/ARR.png")));
-            imagenesAgente.put(Actions.AB, ImageIO.read(getClass().getResource("/assets/ABA.png")));
-            imagenesAgente.put(Actions.IZQ, ImageIO.read(getClass().getResource("/assets/IZQ.png")));
-            imagenesAgente.put(Actions.DCHA, ImageIO.read(getClass().getResource("/assets/DER.png")));
         } catch (IOException | IllegalArgumentException e) {
-            System.out.println("⚠️ No se encontraron imágenes, se usará dibujo por colores.");
+            System.out.println("⚠️  No se encontraron imágenes, se usará dibujo por colores.");
         }
     }
 
     private void inicializarComponentes(String textoInicial) {
         setTitle("Simulación del Agente");
-        setSize(1000, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         setResizable(false);
-        setLayout(new BorderLayout());
 
+        // Panel central para la matriz
         panelMatriz = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -77,7 +67,14 @@ public class AgentSimulationGUI extends JFrame {
         };
         panelMatriz.setPreferredSize(new Dimension(700, 700));
         panelMatriz.setBackground(Color.WHITE);
+        add(panelMatriz, BorderLayout.CENTER);
 
+        // Panel derecho con BoxLayout vertical
+        JPanel panelDerecho = new JPanel();
+        panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.Y_AXIS));
+        panelDerecho.setPreferredSize(new Dimension(300, 700));
+
+        // JTextArea con scroll
         textAreaTraza = new JTextArea();
         textAreaTraza.setEditable(false);
         textAreaTraza.setText(textoInicial);
@@ -85,11 +82,39 @@ public class AgentSimulationGUI extends JFrame {
         textAreaTraza.setWrapStyleWord(true);
 
         JScrollPane scrollPaneTraza = new JScrollPane(textAreaTraza);
-        scrollPaneTraza.setPreferredSize(new Dimension(300, 700));
+        scrollPaneTraza.setAlignmentX(Component.CENTER_ALIGNMENT);
+        scrollPaneTraza.setMaximumSize(new Dimension(300, 700 - 50));
+        scrollPaneTraza.setPreferredSize(new Dimension(300, 700 - 50));
+        scrollPaneTraza.setMinimumSize(new Dimension(300, 100));
+        panelDerecho.add(scrollPaneTraza);
 
-        add(panelMatriz, BorderLayout.CENTER);
-        add(scrollPaneTraza, BorderLayout.EAST);
+        // Espacio flexible para que el botón quede abajo
+        panelDerecho.add(Box.createVerticalGlue());
 
+        // Panel para centrar el botón tanto en X como en Y
+        JPanel panelBoton = new JPanel(new GridBagLayout());
+        JButton cerrarButton = new JButton("Cerrar");
+        cerrarButton.addActionListener(e -> dispose());
+        panelBoton.add(cerrarButton);
+        panelDerecho.add(panelBoton, BorderLayout.SOUTH);
+
+        add(panelDerecho, BorderLayout.EAST);
+        add(panelDerecho, BorderLayout.EAST);
+
+        // Key listener para cerrar con Q
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyChar() == 'q' || e.getKeyChar() == 'Q') {
+                    dispose();
+                }
+            }
+        });
+        setFocusable(true);
+        requestFocusInWindow();
+
+        pack();  // ajusta el tamaño de la ventana al contenido
+        setLocationRelativeTo(null); // centra la ventana en pantalla
         setVisible(true);
     }
 
@@ -120,12 +145,6 @@ public class AgentSimulationGUI extends JFrame {
                             g.setColor(Color.DARK_GRAY);
                         case OBJETIVO ->
                             g.setColor(Color.GREEN);
-                        case SUELO1 ->
-                            g.setColor(new Color(240, 240, 240));
-                        case SUELO2 ->
-                            g.setColor(new Color(220, 220, 220));
-                        case SUELO3 ->
-                            g.setColor(new Color(200, 200, 200));
                         default ->
                             g.setColor(Color.WHITE);
                     }
@@ -153,7 +172,7 @@ public class AgentSimulationGUI extends JFrame {
         textAreaTraza.insert(nuevaAccion + "\n--------------------------------------------\n", 0);
     }
 
-    public void actualizarMatriz(int[][] nuevaMatriz, Actions nuevaDireccionAgente) {
+    public void actualizarMatriz(int[][] nuevaMatriz, Movimientos nuevaDireccionAgente) {
         this.matriz = nuevaMatriz;
         this.direccionAgente = nuevaDireccionAgente;
         panelMatriz.repaint();

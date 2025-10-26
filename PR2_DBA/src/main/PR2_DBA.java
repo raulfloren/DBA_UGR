@@ -1,9 +1,19 @@
 package main;
 
-import GUI.AgentSimulationGUI;
-import action.Actions;
-import environment.MapLoader;
-import java.io.IOException;
+import GUI.SimulacionAgenteGUI;
+import movimientos.Movimientos;
+import agente.Posicion;
+import entorno.Entorno;
+import entorno.Mapa;
+
+//JADE
+import jade.core.Profile;
+import jade.core.ProfileImpl;
+import jade.core.Runtime;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
 
 /**
  *
@@ -12,24 +22,62 @@ import java.io.IOException;
 public class PR2_DBA {
 
     public static void main(String[] args) {
-        if (args.length != 1) { // De momento solo esta el map_name
-            System.err.println("Try: <map_name> <agent_pos_x>  <agent_pos_y> <objective_pos_x>  <objective_pos_y>");
+        if (args.length != 5) {
+            System.err.println("Prueba: <nombre_mapa> <agente_pos_x>  <agente_pos_y> <objectivo_pos_x>  <objectivo_pos_y>");
         }
 
-        String mapName = "resources/maps/" + args[0];
-        
-        //Esto es una prueba de pr
-
         try {
-            // Cargar mapa desde archivo
-            int[][] mapa = MapLoader.loadMap(mapName);
+            // --- Iniciar JADE ---
+            Runtime jadeRuntime = Runtime.instance();
+            Profile mainProfile = new ProfileImpl();
+            mainProfile.setParameter(Profile.GUI, "false");  // No mostrar GUI de JADE
+            AgentContainer mainContainer = jadeRuntime.createMainContainer(mainProfile);
 
-            // Crear ventana del simulador
-            AgentSimulationGUI visualizer = new AgentSimulationGUI("Simulación desde archivo", mapa, Actions.AR);
+            System.out.println("🟢 Main container de JADE iniciado...");
+
+            // --- Crear mapa ---
+            String nombreMapa = args[0];
+            Mapa mapa = new Mapa(nombreMapa);
+
+            // --- Crear posiciones ---
+            int agente_X = Integer.parseInt(args[1]);
+            int agente_Y = Integer.parseInt(args[2]);
+            int objetivo_X = Integer.parseInt(args[3]);
+            int objetivo_Y = Integer.parseInt(args[4]);
+
+            Posicion agentPos = new Posicion(agente_X, agente_Y);
+            Posicion goalPos = new Posicion(objetivo_X, objetivo_Y);
+
+            // --- Crear entorno ---
+            Entorno entorno = new Entorno(mapa, agentPos, goalPos);
+
+            // --- Crear interfaz gráfica ---
+            SimulacionAgenteGUI visualizer = new SimulacionAgenteGUI(
+                    "Simulación desde archivo: " + nombreMapa,
+                    mapa.getMapa(),
+                    Movimientos.AR
+            );
             visualizer.setVisible(true);
 
-        } catch (IOException e) {
-            System.err.println("Error cargando el mapa: " + e.getMessage());
+            // --- Crear contenedor secundario ---
+            Profile agentProfile = new ProfileImpl();
+            ContainerController agentContainer = jadeRuntime.createAgentContainer(agentProfile);
+
+            // --- Crear agente (por ahora sin clase específica) ---
+            String claseAgente = "agente.Agente";
+            Object[] argsAgente = new Object[]{entorno, visualizer};
+
+            AgentController agente = agentContainer.createNewAgent("AgenteInteligente", claseAgente, argsAgente);
+
+            // --- Iniciar agente ---
+            agente.start();
+            System.out.println("🤖 Agente iniciado correctamente.");
+
+        } catch (StaleProxyException e) {
+            e.printStackTrace();
+            System.err.println("❌ Error al crear o iniciar el agente JADE.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,9 +1,8 @@
-package environment;
+package entorno;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-
 
 public class MapLoader {
 
