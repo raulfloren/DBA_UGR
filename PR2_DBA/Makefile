@@ -3,7 +3,7 @@
 SRC_DIR = src
 BUILD_DIR = build/classes
 MAIN_CLASS = main.PR2_DBA
-JADE_LIB = /home/floren/Uni/DBA/JADE/JADE-bin/jade/lib/jade.jar
+JADE_LIB = lib/jade.jar
 
 # Colores
 GREEN = \033[0;32m
