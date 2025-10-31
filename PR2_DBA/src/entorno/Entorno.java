@@ -1,6 +1,6 @@
 package entorno;
 
-import agente.Percepcion;
+import comportamientos.Percepcion;
 import agente.Posicion;
 import movimientos.Movimientos;
 

@@ -1,7 +1,7 @@
 package comportamientos;
 
 import GUI.SimulacionAgenteGUI;
-import agente.Percepcion;
+import agente.Agente;
 import agente.Posicion;
 import entorno.Entorno;
 import jade.core.behaviours.Behaviour;
@@ -12,22 +12,22 @@ import movimientos.Movimientos;
  * @author floren
  * @author juanma
  */
-public class hacerMov extends Behaviour {
+public class HacerMov extends Behaviour {
 
     private Entorno entorno;
     private SimulacionAgenteGUI visualizer;
     private Posicion posObjetivo;
     private boolean objetivoAlcanzado = false;
+    private final Agente agente;
 
-    public hacerMov(Entorno entorno, SimulacionAgenteGUI visualizer, Posicion posObjetivo) {
-        super(null); // 'myAgent' se establece cuando se añada al agente
-        this.entorno = entorno;
-        this.visualizer = visualizer;
-        this.posObjetivo = posObjetivo;
+    public HacerMov(Agente agente) {
+        this.agente = agente;
     }
 
     @Override
     public void action() {
+        agente.hacerMov();
+        /*
         // 1. PERCEPCIÓN
         Percepcion p = entorno.getPercepcion();
 
@@ -48,55 +48,21 @@ public class hacerMov extends Behaviour {
         // 5. ACTUALIZAR GUI (si nos movimos)
         if (movido) {
             visualizer.actualizarMatriz(entorno.getMapa().getMapa(), movDecidido);
-            
+
             // traza en GUI
             String traza = String.format("Pos: (%d, %d)\nAcción: %s\nEnergía: %d",
                     p.posActual.getColumna(), p.posActual.getFila(), // X, Y
                     movDecidido, p.energiaConsumida + 1);
             visualizer.agregarTraza(traza);
         }
-        
+
         // Pausar la simulación para poder verla
         block(200); // 200 ms
-    }
-
-    /**
-     * 
-     * logica greedy simple
-     */
-    private Movimientos decidirMovimiento(Percepcion p) {
-        // Calcular la dirección hacia el objetivo
-        int deltaFila = posObjetivo.getFila() - p.posActual.getFila();
-        int deltaCol = posObjetivo.getColumna() - p.posActual.getColumna();
-
-        // 1. Intentar moverse en Columnas (Eje X)
-        if (deltaCol > 0 && p.sensorDerecha == 0) {
-            return Movimientos.RIGHT;
-        }
-        if (deltaCol < 0 && p.sensorIzquierda == 0) {
-            return Movimientos.LEFT;
-        }
-
-        // 2. Si no podemos o queremos movernos en X, moverse en Filas (Eje Y)
-        if (deltaFila > 0 && p.sensorAbajo == 0) {
-            return Movimientos.DOWN;
-        }
-        if (deltaFila < 0 && p.sensorArriba == 0) {
-            return Movimientos.UP;
-        }
-
-        // 3. Si estamos bloqueados en la dirección 'greedy', probamos lo que sea
-        if (p.sensorArriba == 0) return Movimientos.UP;
-        if (p.sensorAbajo == 0) return Movimientos.DOWN;
-        if (p.sensorIzquierda == 0) return Movimientos.LEFT;
-        if (p.sensorDerecha == 0) return Movimientos.RIGHT;
-
-        // Atascado (sin movimientos libres)
-        return Movimientos.NONE;
+         */
     }
 
     @Override
     public boolean done() {
-        return objetivoAlcanzado;
+        return agente.objetivoEncontrado();
     }
 }
