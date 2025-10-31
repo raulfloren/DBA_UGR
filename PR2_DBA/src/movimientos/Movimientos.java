@@ -1,9 +1,12 @@
 package movimientos;
 
 /**
- *
- * @author floren
+ * Movimientos básicos permitidos por la práctica.
  */
 public enum Movimientos {
-    AR_IZQ, AR, AR_DCHA, IZQ, DCHA, AB_IZQ, AB, AB_DCHA;
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    NONE; // para cuando el agente decide no moverse
 }
