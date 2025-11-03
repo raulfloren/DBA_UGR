@@ -1,15 +1,20 @@
 package comportamientos;
 
 import agente.Agente;
+import entorno.Entorno;
 import jade.core.behaviours.Behaviour;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Validacion extends Behaviour {
 
     private final Agente agente;
+    private Entorno entorno;
     //Sprivate Entorno entorno;
 
-    public Validacion(Agente agente) {
+    public Validacion(Agente agente, Entorno entorno) {
         this.agente = agente;
+        this.entorno = entorno;
     }
 
     @Override
@@ -19,11 +24,34 @@ public class Validacion extends Behaviour {
         y mover agente en la gui
          */
 
+        // Pausar la simulación para poder verla
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Validacion.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        entorno.setPosAgente(agente.getPosAgente(), agente.getPosAnterior());
+
+        agente.getGUI().actualizarMatriz(entorno.getMapa().getMapa(), agente.getMovDecidido());
+
+        // traza en GUI
+        String traza = String.format("Pos: (%d, %d)\nAcción: %s\nEnergía: %d",
+                agente.getPosAgente().getFila(), agente.getPosAgente().getColumna(),
+                agente.getMovDecidido(), agente.getSensores().getEnergia());
+
+        agente.getGUI().agregarTraza(traza);
+
     }
 
     @Override
     public boolean done() {
-        return agente.objetivoEncontrado();
+        if (agente.objetivoEncontrado()) {
+            agente.getGUI().mostrarVentanaVictoria();
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

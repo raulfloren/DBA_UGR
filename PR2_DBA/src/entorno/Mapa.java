@@ -59,7 +59,7 @@ public class Mapa {
         }
     }
 
-    public int ponerItemEnMapa(int row, int column) {
+    public int getItemEnPosicion(int row, int column) {
         int item = mapa[row][column];
         return item;
     }
