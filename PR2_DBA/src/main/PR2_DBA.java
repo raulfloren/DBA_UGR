@@ -3,6 +3,7 @@ package main;
 import GUI.SimulacionAgenteGUI;
 import movimientos.Movimientos;
 import agente.Posicion;
+import agente.Sensores;
 import entorno.Entorno;
 import entorno.Mapa;
 
@@ -15,11 +16,7 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
-/**
- *
- * @author floren
- * @author juanma
- */
+
 public class PR2_DBA {
 
     public static void main(String[] args) {
@@ -47,29 +44,33 @@ public class PR2_DBA {
             int objetivo_X = Integer.parseInt(args[3]); // Columna
             int objetivo_Y = Integer.parseInt(args[4]); // Fila
 
-            // <-- El constructor de Posicion es (fila, columna)(corregido)
-            Posicion agentPos = new Posicion(agente_Y, agente_X);
-            Posicion goalPos = new Posicion(objetivo_Y, objetivo_X);
+            // --- El constructor de Posicion es (fila, columna)
+            Posicion posAgente = new Posicion(agente_Y, agente_X);
+            Posicion posObjetivo = new Posicion(objetivo_Y, objetivo_X);
 
             // --- Crear entorno ---
-            Entorno entorno = new Entorno(mapa, agentPos, goalPos);
+            Entorno entorno = new Entorno(mapa, posAgente, posObjetivo);
+
+            // --- Crear sensores ---
+            Sensores sensores = new Sensores(entorno, 0);
 
             // --- Crear interfaz gráfica ---
-            SimulacionAgenteGUI visualizer = new SimulacionAgenteGUI(
+            SimulacionAgenteGUI GUI = new SimulacionAgenteGUI(
                     "Simulación desde archivo: " + nombreMapa,
                     mapa.getMapa(),
                     Movimientos.UP // <-- Cambiado de AR a UP(corregido)
             );
-            visualizer.setVisible(true);
+            GUI.setVisible(true);
+
+            // --- Crear agente ---
+            String claseAgente = "agente.Agente";
+
+            // Pasamos el Entorno y el Visualizer al agente
+            Object[] argsAgente = new Object[]{posAgente, posObjetivo, sensores, GUI};
 
             // --- Crear contenedor secundario ---
             Profile agentProfile = new ProfileImpl();
             ContainerController agentContainer = jadeRuntime.createAgentContainer(agentProfile);
-
-            // --- Crear agente ---
-            String claseAgente = "agente.Agente";
-            // Pasamos el Entorno y el Visualizer al agente
-            Object[] argsAgente = new Object[]{entorno, visualizer}; 
 
             AgentController agente = agentContainer.createNewAgent("AgenteInteligente", claseAgente, argsAgente);
 

@@ -1,9 +1,5 @@
 package GUI;
 
-/**
- *
- * @author floren
- */
 import movimientos.Movimientos;
 import javax.swing.*;
 import java.awt.*;
