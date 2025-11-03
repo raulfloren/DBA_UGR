@@ -3,10 +3,6 @@ package comportamientos;
 import agente.Agente;
 import jade.core.behaviours.Behaviour;
 
-/**
- *
- * @author juanma
- */
 public class Percepcion extends Behaviour {
 
     private final Agente agente;
@@ -28,9 +24,8 @@ public class Percepcion extends Behaviour {
 
 /*
 
-El metodo see lo que hace es ver las casillas que podemos ver en la posicion actual en la que estamos
+El metodo verCasillasDisponibles lo que hace es ver las casillas que podemos ver en la posicion actual en la que estamos
 
-
-Con esa lista de casillas que tenemos, estudiamos que movimientos podemos hacer
+Con esa lista de casillas que tenemos, estudiamos que movimientos podemos hacer con decidirMov
 
  */

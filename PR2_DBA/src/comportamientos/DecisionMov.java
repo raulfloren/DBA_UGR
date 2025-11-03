@@ -27,6 +27,6 @@ public class DecisionMov extends Behaviour {
 
 De la lista de las casillas posibles que hemos obtenido con el comportamiento percepcion y el metodo verCasillasDisponibles()
 
-Decidimos cual de esas casillas es la que mejor nos viene
+Decidimos cual de esas casillas es la que mejor nos viene y añadimos su movimiento al movimientoDecidido
 
 */

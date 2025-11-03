@@ -16,11 +16,7 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
-/**
- *
- * @author floren
- * @author juanma
- */
+
 public class PR2_DBA {
 
     public static void main(String[] args) {

@@ -10,7 +10,6 @@ public class Validacion extends Behaviour {
 
     private final Agente agente;
     private Entorno entorno;
-    //Sprivate Entorno entorno;
 
     public Validacion(Agente agente, Entorno entorno) {
         this.agente = agente;
@@ -58,8 +57,13 @@ public class Validacion extends Behaviour {
 
 /*
 
-De la lista de las casillas posibles que hemos obtenido con el comportamiento percepcion y el metodo verCasillasDisponibles()
+El movimiento tenia que ser valido pues para que se añadiera a la lista de casillas disponibles tenia que ser una casilla transitable
 
-Decidimos cual de esas casillas es la que mejor nos viene
+ahora bien, una vez hecho el movimiento se actualiza el entorno y la GUI y si se ha llegado al final se muestra la ventana
 
- */
+
+/////
+La memoria del agente se actualizar´ aqui cuando se implemente
+
+
+*/

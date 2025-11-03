@@ -2,10 +2,6 @@ package agente;
 
 import java.util.Objects;
 
-/**
- *
- * @author floren
- */
 public class Posicion {
 
     private int fila, columna;
@@ -35,7 +31,8 @@ public class Posicion {
         Posicion posicion = (Posicion) obj;
         return this.fila == posicion.fila && this.columna == posicion.columna;
     }
-
+    
+    // HashCode (si dos hashcode son iguales, significa que estan en la misma posicion
     @Override
     public int hashCode() {
         return Objects.hash(fila, columna);

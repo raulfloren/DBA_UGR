@@ -4,10 +4,6 @@ import entorno.Entorno;
 import java.util.ArrayList;
 import movimientos.Movimientos;
 
-/**
- *
- * @author floren
- */
 public class Sensores {
 
     private Entorno entorno;
