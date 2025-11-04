@@ -16,7 +16,6 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
-
 public class PR2_DBA {
 
     public static void main(String[] args) {
@@ -65,7 +64,7 @@ public class PR2_DBA {
             // --- Crear agente ---
             String claseAgente = "agente.Agente";
 
-            // Pasamos el Entorno y el Visualizer al agente
+            // --- Pasamos el Entorno y el Visualizer al agente ---
             Object[] argsAgente = new Object[]{posAgente, posObjetivo, sensores, GUI};
 
             // --- Crear contenedor secundario ---

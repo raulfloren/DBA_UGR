@@ -54,7 +54,7 @@ public class Mapa {
     }
 
     public void ponerItemEnMapa(Posicion pos, int item) {
-        if (esPosible(pos)) {
+        if (esTransitable(pos)) {
             mapa[pos.getFila()][pos.getColumna()] = item;
         }
     }
@@ -69,7 +69,8 @@ public class Mapa {
         return item;
     }
 
-    public boolean esPosible(Posicion pos) {
+    public boolean esTransitable(Posicion pos) {
+        // Si esta dentro de los limites y no es un muro
         return (pos.getFila() >= 0 && pos.getFila() < this.getFilas())
                 && (pos.getColumna() >= 0 && pos.getColumna() < this.getColumnas())
                 && (this.getItemEnPosicion(pos) != -1);

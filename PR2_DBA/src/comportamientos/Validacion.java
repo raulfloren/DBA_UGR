@@ -31,7 +31,7 @@ public class Validacion extends Behaviour {
         }
 
         entorno.setPosAgente(agente.getPosAgente(), agente.getPosAnterior());
-
+        agente.imprimirMemoria();
         agente.getGUI().actualizarMatriz(entorno.getMapa().getMapa(), agente.getMovDecidido());
 
         // traza en GUI
@@ -66,4 +66,4 @@ ahora bien, una vez hecho el movimiento se actualiza el entorno y la GUI y si se
 La memoria del agente se actualizar´ aqui cuando se implemente
 
 
-*/
+ */
