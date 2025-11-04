@@ -14,7 +14,7 @@ public class SimulacionAgenteGUI extends JFrame {
     private JTextArea textAreaTraza;
     private JPanel panelMatriz;
 
-    private final static int MURO = -1, SUELO = 0, CAMINO = 1, AGENTE = -2, OBJETIVO = -3;
+    private final static int MURO = -1, SUELO = 0, SUELO2 = 1, CAMINO = -4, AGENTE = -2, OBJETIVO = -3;
 
     private Movimientos direccionAgente;
     private Map<Movimientos, Image> imagenesAgente;
@@ -41,8 +41,17 @@ public class SimulacionAgenteGUI extends JFrame {
         imagenes = new HashMap<>();
         try {
             imagenes.put(SUELO, ImageIO.read(getClass().getResource("/assets/SUELO.png")));
+            imagenes.put(SUELO2, ImageIO.read(getClass().getResource("/assets/SUELO2.png")));
             imagenes.put(MURO, ImageIO.read(getClass().getResource("/assets/MURO.png")));
+            imagenes.put(CAMINO, ImageIO.read(getClass().getResource("/assets/CAMINO.png")));
             imagenes.put(OBJETIVO, ImageIO.read(getClass().getResource("/assets/OBJETIVO.png")));
+            
+            imagenesAgente.put(Movimientos.DOWN, ImageIO.read(getClass().getResource("/assets/heroDOWN.png")));
+            imagenesAgente.put(Movimientos.UP, ImageIO.read(getClass().getResource("/assets/heroUP.png")));
+            imagenesAgente.put(Movimientos.LEFT, ImageIO.read(getClass().getResource("/assets/heroLEFT.png")));
+            imagenesAgente.put(Movimientos.RIGHT, ImageIO.read(getClass().getResource("/assets/heroRIGHT.png")));
+            imagenesAgente.put(Movimientos.NONE, ImageIO.read(getClass().getResource("/assets/heroDOWN.png")));
+            
         } catch (IOException | IllegalArgumentException e) {
             System.out.println("⚠️  No se encontraron imágenes, se usará dibujo por colores.");
         }
@@ -129,6 +138,7 @@ public class SimulacionAgenteGUI extends JFrame {
         for (int i = 0; i < filas; i++) {
             for (int j = 0; j < columnas; j++) {
                 int valor = matriz[i][j];
+                
                 Image imagen = imagenes.get(valor);
 
                 if (imagen != null) {
