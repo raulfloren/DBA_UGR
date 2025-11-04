@@ -3,7 +3,6 @@ package comportamientos;
 import agente.Agente;
 import jade.core.behaviours.Behaviour;
 
-
 public class HacerMov extends Behaviour {
 
     private final Agente agente;
@@ -15,6 +14,7 @@ public class HacerMov extends Behaviour {
     @Override
     public void action() {
         agente.hacerMov();
+        agente.updateMemoriaVisitadas();
     }
 
     @Override
@@ -27,4 +27,4 @@ public class HacerMov extends Behaviour {
 
 Hacemos el movimientoDecidido y aumentamos la energia con los sensores
 
-*/
+ */

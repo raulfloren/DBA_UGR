@@ -31,7 +31,7 @@ public class Posicion {
         Posicion posicion = (Posicion) obj;
         return this.fila == posicion.fila && this.columna == posicion.columna;
     }
-    
+
     // HashCode (si dos hashcode son iguales, significa que estan en la misma posicion
     @Override
     public int hashCode() {
@@ -44,6 +44,10 @@ public class Posicion {
 
     void setColumna(int columna) {
         this.columna = columna;
+    }
+
+    public Posicion(Posicion copia) {
+        this(copia.getFila(), copia.getColumna());
     }
 
 }
