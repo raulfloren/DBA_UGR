@@ -8,6 +8,7 @@ import comportamientos.Validacion;
 import jade.core.Agent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import movimientos.Movimientos;
 import static movimientos.Movimientos.*;
@@ -26,6 +27,16 @@ public class Agente extends Agent {
     private Movimientos movimientoDecidido; // se modifciara en decidirMov()
     private Posicion posAnterior; //Para dibujar rastro
 
+    // Memoria del agente
+    private HashMap<Posicion, Integer> memoriaVisitadas;
+    private HashSet<Posicion> memoriaVistas;
+
+    private static final int PESO_DISTANCIA = 5;
+    private static final int PESO_MEMORIA = 7;
+
+    private static final int PENALTY_VISITADA = 7;
+    private static final int PENALTY_VISTA = 2;
+
     // Constructor
     public Agente(Posicion posAgente, Posicion posObjetivo, Sensores sensores) {
         this.posAgente = posAgente;
@@ -33,6 +44,10 @@ public class Agente extends Agent {
         this.sensores = sensores;
         this.casillasDisponibles = new ArrayList<>();
         this.movimientoDecidido = null;
+
+        this.memoriaVisitadas = new HashMap<>();
+        this.memoriaVistas = new HashSet<>();
+
     }
 
     public Agente() {
@@ -49,7 +64,6 @@ public class Agente extends Agent {
             posObjetivo = (Posicion) args[1];
             sensores = (Sensores) args[2];
             GUI = (SimulacionAgenteGUI) args[3];
-
         } else {
             System.err.println("❌ Error: El agente necesita (posAgente, posObjetivo, Senores, GUI) como argumentos.");
             doDelete();
@@ -63,68 +77,117 @@ public class Agente extends Agent {
 
     }
 
+    // Getter y Setters
     public Sensores getSensores() {
         return sensores;
+    }
+
+    public SimulacionAgenteGUI getGUI() {
+        return GUI;
+    }
+
+    public Movimientos getMovDecidido() {
+        return movimientoDecidido;
+    }
+
+    public Posicion getPosAgente() {
+        return posAgente;
+    }
+
+    public Posicion getPosAnterior() {
+        return posAnterior;
     }
 
     public boolean objetivoEncontrado() {
         return posAgente.equals(posObjetivo);
     }
 
+    // Casillas adyacentes disponibles
     public void verCasillasDisponibles() {
         this.casillasDisponibles = sensores.verCasillasDisponibles();
     }
 
+    // Decidir movimiento
     public void decidirMov() {
-        Map<Movimientos, Integer> distanciaEnCasilla = new HashMap<>();
+        Map<Movimientos, Double> costesCasilla = new HashMap<>();
 
         for (Movimientos mov : casillasDisponibles) {
-            calcularDistanciaTrasMov(mov, distanciaEnCasilla);
+            System.out.println("  AAAAAAAAAAAAAAAA:" + mov.toString() + "BBBBB");
+            costesCasilla.put(mov, calcularCosteMov(mov));
         }
 
-        // El que menor distancia nos de sera el mejor
         Movimientos mejorMovimiento = null;
-        int menorDistancia = Integer.MAX_VALUE;
+        double menorCoste = Double.MAX_VALUE;
 
-        for (Map.Entry<Movimientos, Integer> entry : distanciaEnCasilla.entrySet()) {
-            if (entry.getValue() < menorDistancia) {
-                menorDistancia = entry.getValue();
-                mejorMovimiento = entry.getKey();
+        for (Map.Entry<Movimientos, Double> entry : costesCasilla.entrySet()) {
+            Movimientos mov = entry.getKey();
+            double coste = entry.getValue();
+
+            // Imprime un log útil para depurar
+            System.out.println(String.format("  -> Opción: %s, Costo: %.2f", mov, coste));
+
+            if (coste < menorCoste) {
+                // Encontramos un nuevo coste mínimo
+                menorCoste = coste;
+                mejorMovimiento = mov;
             }
         }
+
         this.movimientoDecidido = mejorMovimiento;
+
+        System.out.println("==> Movimiento Decidido: " + this.movimientoDecidido);
     }
 
-    private void calcularDistanciaTrasMov(Movimientos mov, Map<Movimientos, Integer> distanciaEnCasilla) {
+    // Distancia al objetivo tras hacer el movimiento siguiente 
+    private double calcularCosteMov(Movimientos mov) {
+
         Posicion posTrasMov = new Posicion(posAgente.getFila(), posAgente.getColumna());
 
         switch (mov) {
-            case UP:
+            case UP ->
                 posTrasMov.setFila(posAgente.getFila() - 1);
-                break;
-            case DOWN:
+            case DOWN ->
                 posTrasMov.setFila(posAgente.getFila() + 1);
-                break;
-            case LEFT:
+            case LEFT ->
                 posTrasMov.setColumna(posAgente.getColumna() - 1);
-                break;
-            case RIGHT:
+            case RIGHT ->
                 posTrasMov.setColumna(posAgente.getColumna() + 1);
-                break;
         }
 
-        int distancia = distanciaManhattan(posTrasMov, posObjetivo);
-        distanciaEnCasilla.put(mov, distancia);
+        double costeDistancia = distanciaManhattan(posTrasMov, posObjetivo);
+        costeDistancia += distanciaEuclidea(posTrasMov, posObjetivo);
+
+        int costeMemoria;
+
+        if (memoriaVisitadas.containsKey(posTrasMov)) {        // Si la hemos visitado ya y la vamos a visitar de nuevo
+            int visitas = memoriaVisitadas.getOrDefault(posTrasMov, 0) + 1;
+            costeMemoria = PENALTY_VISITADA * visitas;
+        } else if (memoriaVistas.contains(posTrasMov)) {        // Si la hemos visto ya y nos vamos a mover a ella 
+            costeMemoria = PENALTY_VISTA;
+        } else {                                                    // No hemos visitado la celda, ni la gemos visto anteriormente
+            costeMemoria = 0;
+        }
+
+        return (PESO_DISTANCIA * costeDistancia) + (PESO_MEMORIA * costeMemoria);
 
     }
 
+    // Distancia Manhattan desde la posAgente hasta la posIbjetivo
     private int distanciaManhattan(Posicion posAgente, Posicion posObjetivo) {
         return Math.abs(posObjetivo.getFila() - posAgente.getFila()) + Math.abs(posObjetivo.getColumna() - posAgente.getColumna());
     }
 
+    // Distancia Ecuclidea desde la posAgente hasta la posIbjetivo
+    private double distanciaEuclidea(Posicion posAgente, Posicion posObjetivo) {
+        int filaAux = posObjetivo.getFila() - posAgente.getFila();
+        int colAux = posObjetivo.getColumna() - posAgente.getColumna();
+        return Math.sqrt(filaAux * filaAux + colAux * colAux);
+    }
+
+    // Hacer el movimiento
     public void hacerMov() {
-        //modificar pos agente en -1 filas y 0 columnas ...
-        posAnterior = new Posicion(posAgente.getFila(), posAgente.getColumna());;
+        // Guardamos la posicion anterior para actulizar el entorno y la GUI
+        posAnterior = new Posicion(posAgente);
 
         switch (movimientoDecidido) {
             case UP:
@@ -148,19 +211,36 @@ public class Agente extends Agent {
         sensores.addEnergia();
     }
 
-    public SimulacionAgenteGUI getGUI() {
-        return GUI;
+    // --- MÉTODOS DE MEMORIA ---
+    // Casillas vistas y visitadas por el agente
+    public void updateMemoriaVisitadas() {
+        Posicion posActualCopia = new Posicion(posAgente);
+        memoriaVisitadas.put(posActualCopia, memoriaVisitadas.getOrDefault(posActualCopia, 0) + 1);
     }
 
-    public Movimientos getMovDecidido() {
-        return movimientoDecidido;
+    public void updateMemoriaVistas() {
+        ArrayList<Posicion> casillasVistas = sensores.getCasillasVistas();
+        for (Posicion pos : casillasVistas) {
+            memoriaVistas.add(new Posicion(pos));
+        }
     }
 
-    public Posicion getPosAgente() {
-        return posAgente;
+    public void imprimirMemoria() {
+        System.out.println("Memoria del Agente:");
+        for (HashMap.Entry<Posicion, Integer> entry : memoriaVisitadas.entrySet()) {
+            Posicion posicion = entry.getKey();
+            Integer vecesPasadas = entry.getValue();
+            System.out.println(String.format("Posición: %d %d, Veces Pasadas: %d", posicion.getFila(), posicion.getColumna(), vecesPasadas));
+        }
     }
 
-    public Posicion getPosAnterior() {
-        return posAnterior;
+    @Override
+    protected void takeDown() {
+        System.out.println("Agente " + getAID().getLocalName() + " terminando (takeDown).");
+
+        // Cierra la ventana de la GUI (por si acaso no se cerró)
+        if (GUI != null) {
+            GUI.dispose();
+        }
     }
 }

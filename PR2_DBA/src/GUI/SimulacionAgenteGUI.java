@@ -58,7 +58,7 @@ public class SimulacionAgenteGUI extends JFrame {
 
     private void inicializarComponentes(String textoInicial) {
         setTitle("Simulación del Agente");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
 
         // Panel central para la matriz
@@ -150,6 +150,8 @@ public class SimulacionAgenteGUI extends JFrame {
                             g.setColor(Color.DARK_GRAY);
                         case OBJETIVO ->
                             g.setColor(Color.GREEN);
+                        case CAMINO ->
+                            g.setColor(Color.LIGHT_GRAY);
                         default ->
                             g.setColor(Color.WHITE);
                     }

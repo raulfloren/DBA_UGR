@@ -8,10 +8,12 @@ public class Sensores {
 
     private Entorno entorno;
     private int energia;
+    private ArrayList<Posicion> casillasVistas;
 
-    public Sensores(Entorno entorno, int engeria) {
+    public Sensores(Entorno entorno, int energia) {
         this.entorno = entorno;
         this.energia = energia;
+        casillasVistas = new ArrayList<>();
     }
 
     public void addEnergia() {
@@ -36,12 +38,15 @@ public class Sensores {
         if (leerSensores(fila - 1, columna, Movimientos.UP) != null) {
             casillasDisponibles.add(Movimientos.UP);
         }
+
         if (leerSensores(fila + 1, columna, Movimientos.DOWN) != null) {
             casillasDisponibles.add(Movimientos.DOWN);
         }
+
         if (leerSensores(fila, columna - 1, Movimientos.LEFT) != null) {
             casillasDisponibles.add(Movimientos.LEFT);
         }
+
         if (leerSensores(fila, columna + 1, Movimientos.RIGHT) != null) {
             casillasDisponibles.add(Movimientos.RIGHT);
         }
@@ -55,6 +60,7 @@ public class Sensores {
      */
     private Movimientos leerSensores(int fila, int columna, Movimientos movimiento) {
         //Aqui hay que comprobar la direccion de los 4 sensores
+        casillasVistas.add(new Posicion(fila, columna));
 
         // Comprobar límites del mapa
         if (fila < 0 || fila >= entorno.getMapa().getFilas() || columna < 0 || columna >= entorno.getMapa().getColumnas()) {
@@ -67,5 +73,9 @@ public class Sensores {
         }
 
         return movimiento; // Celda libre
+    }
+
+    public ArrayList<Posicion> getCasillasVistas() {
+        return casillasVistas;
     }
 }
