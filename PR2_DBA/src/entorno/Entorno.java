@@ -4,7 +4,7 @@ import agente.Posicion;
 
 public class Entorno {
 
-    private final static int AGENTE_ID = -2, OBJETIVO_ID = -3, SUELO_ID = 0;
+    private final static int AGENTE_ID = -2, OBJETIVO_ID = -3, SUELO_ID = 0, CAMINO_ID = -4;
     private Mapa mapa;
     private Posicion posAgente; // <-- Posición REAL del agente
     private final Posicion posObjetivo;
@@ -33,6 +33,6 @@ public class Entorno {
     public void setPosAgente(Posicion posAgente, Posicion posAnterior) {
         this.posAgente = posAgente;
         mapa.ponerItemEnMapa(posAgente, AGENTE_ID);
-        mapa.ponerItemEnMapa(posAnterior, 1);
+        mapa.ponerItemEnMapa(posAnterior, CAMINO_ID);
     }
 }

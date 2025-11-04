@@ -14,7 +14,7 @@ public class SimulacionAgenteGUI extends JFrame {
     private JTextArea textAreaTraza;
     private JPanel panelMatriz;
 
-    private final static int MURO = -1, SUELO = 0, SUELO2 = 1, AGENTE = 9, OBJETIVO = 8;
+    private final static int MURO = -1, SUELO = 0, SUELO2 = 1, CAMINO = -4, AGENTE = -2, OBJETIVO = -3;
 
     private Movimientos direccionAgente;
     private Map<Movimientos, Image> imagenesAgente;
@@ -43,6 +43,7 @@ public class SimulacionAgenteGUI extends JFrame {
             imagenes.put(SUELO, ImageIO.read(getClass().getResource("/assets/SUELO.png")));
             imagenes.put(SUELO2, ImageIO.read(getClass().getResource("/assets/SUELO2.png")));
             imagenes.put(MURO, ImageIO.read(getClass().getResource("/assets/MURO.png")));
+            imagenes.put(CAMINO, ImageIO.read(getClass().getResource("/assets/CAMINO.png")));
             imagenes.put(OBJETIVO, ImageIO.read(getClass().getResource("/assets/OBJETIVO.png")));
             
             imagenesAgente.put(Movimientos.DOWN, ImageIO.read(getClass().getResource("/assets/heroDOWN.png")));
