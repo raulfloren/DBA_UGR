@@ -25,7 +25,7 @@ public class Validacion extends Behaviour {
 
         // Pausar la simulación para poder verla
         try {
-            Thread.sleep(200);
+            Thread.sleep(5);
         } catch (InterruptedException ex) {
             Logger.getLogger(Validacion.class.getName()).log(Level.SEVERE, null, ex);
         }

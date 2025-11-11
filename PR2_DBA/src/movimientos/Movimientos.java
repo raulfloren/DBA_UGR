@@ -8,5 +8,4 @@ public enum Movimientos {
     DOWN,
     LEFT,
     RIGHT,
-    NONE; // para cuando el agente decide no moverse
 }

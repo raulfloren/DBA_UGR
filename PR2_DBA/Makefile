@@ -19,7 +19,8 @@ MAPS = mapWithoutObstacle.txt \
        mapWithComplexObstacle1.txt \
        mapWithComplexObstacle2.txt \
        mapWithComplexObstacle3.txt \
-       mapWithComplexObstacle4.txt
+       mapWithComplexObstacle4.txt \
+       mapita.txt
 
 # Posiciones del agente y del objetivo
 AGENTX = 2
@@ -27,7 +28,7 @@ AGENTY = 2
 GOALX  = 7
 GOALY  = 7
 
-.PHONY: all compile clean 0 1 2 3 4 5 6 7
+.PHONY: all compile clean 0 1 2 3 4 5 6 7 8
 
 all: compile
 
@@ -45,16 +46,37 @@ clean:
 		printf "$(YELLOW)🧹 Archivos compilados eliminados$(RESET)\n"
 
 # Ejecutar mapas según índice
-0 1 2 3 4 5 6 7:
+0 1 2 3 4 5 6 7 8:
 	@IDX=$@ ; \
 	MAPFILE=$$(echo $(MAPS) | cut -d' ' -f$$((IDX+1))) ; \
 	printf "$(YELLOW)Ejecutando mapa: $$MAPFILE$(RESET)\n"; \
 	java -cp $(BUILD_DIR):$(JADE_LIB):resources $(MAIN_CLASS) resources/maps/$$MAPFILE $(AGENTX) $(AGENTY) $(GOALX) $(GOALY)
 
 
-# Como ejecutar el Makefile
+# --- Cómo ejecutar el Makefile ---
+#
+# Compilar:
+#   make
+#
+# Limpiar:
+#   make clean
+#
+# Ejecutar un mapa (ej. mapa 0) con posiciones por defecto:
+#   make 0
+#
+# Ejecutar un mapa (ej. mapa 1) con posiciones PERSONALIZADAS:
+#   make 2 AGENTX=4 AGENTY=2 GOALX=5 GOALY=7
+#   make 4 AGENTX=2 AGENTY=7 GOALX=6 GOALY=5
+#   make 7 AGENTX=2 AGENTY=2 GOALX=37 GOALY=47
+#   make 8 AGENTX=29 AGENTY=14 GOALX=14 GOALY=14
 
-# make 0 
 
-# Esto ejecuta el mapa 0, cammbiando el numero un nuevo mapa
-# la posicion del agente y el objetivo estan puestas arriba
+# mapWithoutObstacle.txt        10
+# mapWithVerticalWall.txt       42
+# mapWithHorizontalWall.txt     10
+# mapWithDiagonalWall.txt       42
+# mapWithComplexObstacle1.txt   14
+# mapWithComplexObstacle2.txt   14
+# mapWithComplexObstacle3.txt   40
+# mapWithComplexObstacle4.txt   11250 (barbaridad)
+# mapita.txt                    51
