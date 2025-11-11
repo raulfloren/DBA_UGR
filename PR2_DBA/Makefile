@@ -78,5 +78,5 @@ clean:
 # mapWithComplexObstacle1.txt   14
 # mapWithComplexObstacle2.txt   14
 # mapWithComplexObstacle3.txt   40
-# mapWithComplexObstacle4.txt   11250 (barbaridad)
+# mapWithComplexObstacle4.txt   2488
 # mapita.txt                    51

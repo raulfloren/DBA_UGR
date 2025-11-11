@@ -31,7 +31,7 @@ public class Agente extends Agent {
     private HashMap<Posicion, Double> memoriaHeuristica;
 
     private HashMap<Posicion, Integer> memoriaVisitadas;
-    private static final double PENALTY_VISITADA = 7.0; // Penalización pequeña
+    private static final double PENALTY_VISITADA = 0.3; // Penalización pequeña
 
     // Coste de dar un paso
     private static final double COSTE_ENERGIA = 1.0;
@@ -142,7 +142,9 @@ public class Agente extends Agent {
         // Si la hemos visitado CUALQUIER número de veces, añadimos la penalización.
         if (memoriaVisitadas.containsKey(proximaPos)) {
             // El coste de decisión es el coste real MÁS la penalización
-            return COSTE_ENERGIA + PENALTY_VISITADA;
+            double h = getHeuristica(proximaPos);
+            return COSTE_ENERGIA + (h * PENALTY_VISITADA);
+
         } else {
             return COSTE_ENERGIA; // Coste normal
         }
@@ -160,9 +162,15 @@ public class Agente extends Agent {
 
         double H_actual = getHeuristica(posAgente); // H de la casilla actual
 
+        Posicion posPrev = posAnterior;
+
         for (Movimientos mov : casillasDisponibles) {
             Posicion proximaPos = getProximaPosicion(mov);
             double H_proximaPos = getHeuristica(proximaPos);
+
+            if (posPrev != null && proximaPos.equals(posPrev)) {
+                continue; // evita volver atrás directamente
+            }
 
             // --- 1. Coste para Aprender (Puro) ---
             double costeF_Aprendizaje = COSTE_ENERGIA + H_proximaPos;
@@ -203,7 +211,7 @@ public class Agente extends Agent {
             Posicion posActualCopia = new Posicion(posAgente);
 
             // H_nuevo no se irá a Infinito gracias a la corrección del bug
-            double H_nuevo = Math.max(H_actual, minCosteAprendizaje);
+            double H_nuevo = Math.max(H_actual, minCosteAprendizaje + COSTE_ENERGIA);
 
             memoriaHeuristica.put(posActualCopia, H_nuevo);
         }
