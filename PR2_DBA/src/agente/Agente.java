@@ -139,15 +139,20 @@ public class Agente extends Agent {
     }
 
     private double calcularCostePaso(Posicion proximaPos) {
-        // Si la hemos visitado CUALQUIER número de veces, añadimos la penalización.
-        if (memoriaVisitadas.containsKey(proximaPos)) {
-            // El coste de decisión es el coste real MÁS la penalización
-            double h = getHeuristica(proximaPos);
-            return COSTE_ENERGIA + (h * PENALTY_VISITADA);
+        double h = getHeuristica(proximaPos);  // obtenemos la heurística base
 
-        } else {
-            return COSTE_ENERGIA; // Coste normal
+        // Si nunca se ha visitado, el coste es normal
+        if (!memoriaVisitadas.containsKey(proximaPos)) {
+            return COSTE_ENERGIA;
         }
+
+        // Si ya se ha visitado, aplicamos penalización dinámica
+        int veces = memoriaVisitadas.getOrDefault(proximaPos, 0);
+
+        // Penalización progresiva: cuanto más se visita, más caro es
+        double penalizacionDinamica = h * (PENALTY_VISITADA * veces);
+
+        return COSTE_ENERGIA + penalizacionDinamica;
     }
 
     // Decidir movimiento (LRTA*)
@@ -183,7 +188,20 @@ public class Agente extends Agent {
             // --- 2. Coste para Decidir (Con Penalización) ---
             // k será 1.0 (nuevo) o 2.0 (visitado)
             double K_costePaso_conPenalizacion = calcularCostePaso(proximaPos);
-            double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos;
+            double dx = posObjetivo.getColumna() - posAgente.getColumna();
+            double dy = posObjetivo.getFila() - posAgente.getFila();
+            double dirX = Math.signum(dx), dirY = Math.signum(dy);
+
+            Posicion next = getProximaPosicion(mov);
+            double preferenciaDireccion = 0;
+            if (dirX != 0 && Math.signum(next.getColumna() - posAgente.getColumna()) == dirX) {
+                preferenciaDireccion -= 0.2;
+            }
+            if (dirY != 0 && Math.signum(next.getFila() - posAgente.getFila()) == dirY) {
+                preferenciaDireccion -= 0.2;
+            }
+
+            double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion;
 
             // --- 3. Lógica de Decisión con Desempate ---
             if (costeF_Decision < minCosteDecision) {
@@ -210,8 +228,16 @@ public class Agente extends Agent {
         if (!casillasDisponibles.isEmpty()) {
             Posicion posActualCopia = new Posicion(posAgente);
 
-            // H_nuevo no se irá a Infinito gracias a la corrección del bug
-            double H_nuevo = Math.max(H_actual, minCosteAprendizaje + COSTE_ENERGIA);
+            // Aprendizaje LRTA* clásico pero reforzado
+            // ¡¡ARREGLO!! minCosteAprendizaje YA incluye el COSTE_ENERGIA.
+            double H_nuevo = Math.max(H_actual, minCosteAprendizaje);
+
+            // Refuerzo: si el incremento es demasiado pequeño, aumenta un poco más
+            // (Esta lógica de refuerzo ahora funcionará correctamente)
+            double incremento = Math.abs(H_nuevo - H_actual);
+            if (incremento < 1.0) {
+                H_nuevo += 1.0; // refuerzo mínimo para acelerar el aprendizaje en zonas repetitivas
+            }
 
             memoriaHeuristica.put(posActualCopia, H_nuevo);
         }
