@@ -36,6 +36,8 @@ public class Agente extends Agent {
     // Coste de dar un paso
     private static final double COSTE_ENERGIA = 1.0;
 
+    private Movimientos ultimoMovimiento = null;
+
     // Constructor
     public Agente(Posicion posAgente, Posicion posObjetivo, Sensores sensores) {
         this.posAgente = posAgente;
@@ -156,8 +158,6 @@ public class Agente extends Agent {
     }
 
     // Decidir movimiento (LRTA*)
-// Archivo: agente/Agente.java
-    // Decidir movimiento (LRTA* Híbrido + Desempate Euclídeo)
     public void decidirMov() {
 
         double minCosteDecision = Double.MAX_VALUE;    // El 'f_dec' más bajo encontrado
@@ -201,7 +201,18 @@ public class Agente extends Agent {
                 preferenciaDireccion -= 0.2;
             }
 
-            double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion;
+            // 2.b. Preferencia por Momentum (Inercia)
+            // Damos un bonus (coste negativo) si el movimiento actual
+            // es el mismo que el último movimiento realizado.
+            // Esto "pega" al agente a una dirección (ej. seguir pegado al muro).
+            double preferenciaMomentum = 0;
+            if (ultimoMovimiento != null && mov == ultimoMovimiento) {
+                // Fuerte preferencia por seguir recto
+                preferenciaMomentum = -0.3; // Ajusta este valor si es necesario
+            }
+
+            //double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion;
+            double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion + preferenciaMomentum;
 
             // --- 3. Lógica de Decisión con Desempate ---
             if (costeF_Decision < minCosteDecision) {
@@ -271,25 +282,23 @@ public class Agente extends Agent {
             return;
         }
         switch (movimientoDecidido) {
-            case UP:
+            case UP ->
                 posAgente.setFila(posAgente.getFila() - 1);  // Arriba
-                break;
 
-            case DOWN:
+            case DOWN ->
                 posAgente.setFila(posAgente.getFila() + 1);  // Abajo
-                break;
 
-            case LEFT:
+            case LEFT ->
                 posAgente.setColumna(posAgente.getColumna() - 1);  // Izquierda
-                break;
 
-            case RIGHT:
+            case RIGHT ->
                 posAgente.setColumna(posAgente.getColumna() + 1);  // Derecha
-                break;
 
         }
 
         sensores.addEnergia();
+
+        this.ultimoMovimiento = this.movimientoDecidido;
     }
 
     public void updateMemoriaVisitadas() {

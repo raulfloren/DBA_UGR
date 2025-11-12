@@ -71,12 +71,12 @@ clean:
 #   make 8 AGENTX=29 AGENTY=14 GOALX=14 GOALY=14
 
 
-# mapWithoutObstacle.txt        10
-# mapWithVerticalWall.txt       42
-# mapWithHorizontalWall.txt     10
-# mapWithDiagonalWall.txt       42
-# mapWithComplexObstacle1.txt   14
-# mapWithComplexObstacle2.txt   14
-# mapWithComplexObstacle3.txt   40
-# mapWithComplexObstacle4.txt   1848
-# mapita.txt                    51
+# mapWithoutObstacle.txt        10  /   10
+# mapWithVerticalWall.txt       42  /   22
+# mapWithHorizontalWall.txt     10  /   10
+# mapWithDiagonalWall.txt       42  /   34
+# mapWithComplexObstacle1.txt   14  /   14
+# mapWithComplexObstacle2.txt   14  /   12
+# mapWithComplexObstacle3.txt   40  /   22
+# mapWithComplexObstacle4.txt   1848/   1386
+# mapita.txt                    51  /   51
