@@ -31,7 +31,7 @@ public class Agente extends Agent {
     private HashMap<Posicion, Double> memoriaHeuristica;
 
     private HashMap<Posicion, Integer> memoriaVisitadas;
-    private static final double PENALTY_VISITADA = 0.3; // Penalización pequeña
+    private static final double PENALTY_VISITADA = 0.4; // Penalización pequeña
 
     // Coste de dar un paso
     private static final double COSTE_ENERGIA = 1.0;
@@ -109,9 +109,7 @@ public class Agente extends Agent {
     }
 
     // --- LÓGICA DE DECISIÓN LRTA* ---
-    /**
-     * Obtiene la posición resultante tras aplicar un movimiento.
-     */
+    // Posicion simulada despues de un movimiento
     private Posicion getProximaPosicion(Movimientos mov) {
         Posicion posTrasMov = switch (mov) {
             case UP ->
@@ -208,7 +206,7 @@ public class Agente extends Agent {
             double preferenciaMomentum = 0;
             if (ultimoMovimiento != null && mov == ultimoMovimiento) {
                 // Fuerte preferencia por seguir recto
-                preferenciaMomentum = -0.3; // Ajusta este valor si es necesario
+                preferenciaMomentum = -0.1; // Ajusta este valor si es necesario
             }
 
             //double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion;
@@ -243,13 +241,14 @@ public class Agente extends Agent {
             // ¡¡ARREGLO!! minCosteAprendizaje YA incluye el COSTE_ENERGIA.
             double H_nuevo = Math.max(H_actual, minCosteAprendizaje);
 
+            /*
             // Refuerzo: si el incremento es demasiado pequeño, aumenta un poco más
             // (Esta lógica de refuerzo ahora funcionará correctamente)
             double incremento = Math.abs(H_nuevo - H_actual);
             if (incremento < 1.0) {
                 H_nuevo += 1.0; // refuerzo mínimo para acelerar el aprendizaje en zonas repetitivas
             }
-
+             */
             memoriaHeuristica.put(posActualCopia, H_nuevo);
         }
 

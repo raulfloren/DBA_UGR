@@ -83,15 +83,15 @@ clean:
 
 
 
-# MAPA POSICIONES PROFESOR                      Profesor    Nuestro
-#   make 0 AGENTX=9 AGENTY=9 GOALX=0 GOALY=0    18          18
-#   make 1 AGENTX=9 AGENTY=9 GOALX=0 GOALY=7    23          23
-#   make 2 AGENTX=5 AGENTY=9 GOALX=4 GOALY=0    14          14
-#   make 3 AGENTX=9 AGENTY=9 GOALX=9 GOALY=0    31          87
+#   MAPA POSICIONES PROFESOR                        Profesor    Nuestro
+#   make 0 AGENTX=9 AGENTY=9 GOALX=0 GOALY=0        18          18
+#   make 1 AGENTX=9 AGENTY=9 GOALX=0 GOALY=7        23          23
+#   make 2 AGENTX=5 AGENTY=9 GOALX=4 GOALY=0        14          14
+#   make 3 AGENTX=9 AGENTY=9 GOALX=9 GOALY=0        31          87 (59)
 
-#   make 4 AGENTX=6 AGENTY=9 GOALX=6 GOALY=5    16          16
-#   make 5 AGENTX=6 AGENTY=9 GOALX=6 GOALY=3    20          50
-#   make 6 AGENTX=9 AGENTY=9 GOALX=4 GOALY=7    25          33
-#   make 7 AGENTX=40 AGENTY=49 GOALX=11 GOALY=21    117     177
-#   make 7 AGENTX=35 AGENTY=49 GOALX=40 GOALY=4    130      128
+#   make 4 AGENTX=6 AGENTY=9 GOALX=6 GOALY=5        16          16 
+#   make 5 AGENTX=6 AGENTY=9 GOALX=6 GOALY=3        20          50 (38)
+#   make 6 AGENTX=9 AGENTY=9 GOALX=4 GOALY=7        25          33 (37)
+#   make 7 AGENTX=40 AGENTY=49 GOALX=11 GOALY=21    117         177
+#   make 7 AGENTX=35 AGENTY=49 GOALX=40 GOALY=4     130         128
 
