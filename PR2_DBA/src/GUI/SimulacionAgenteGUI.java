@@ -45,13 +45,12 @@ public class SimulacionAgenteGUI extends JFrame {
             imagenes.put(MURO, ImageIO.read(getClass().getResource("/assets/MURO.png")));
             imagenes.put(CAMINO, ImageIO.read(getClass().getResource("/assets/CAMINO.png")));
             imagenes.put(OBJETIVO, ImageIO.read(getClass().getResource("/assets/OBJETIVO.png")));
-            
+
             imagenesAgente.put(Movimientos.DOWN, ImageIO.read(getClass().getResource("/assets/heroDOWN.png")));
             imagenesAgente.put(Movimientos.UP, ImageIO.read(getClass().getResource("/assets/heroUP.png")));
             imagenesAgente.put(Movimientos.LEFT, ImageIO.read(getClass().getResource("/assets/heroLEFT.png")));
             imagenesAgente.put(Movimientos.RIGHT, ImageIO.read(getClass().getResource("/assets/heroRIGHT.png")));
-            imagenesAgente.put(Movimientos.NONE, ImageIO.read(getClass().getResource("/assets/heroDOWN.png")));
-            
+
         } catch (IOException | IllegalArgumentException e) {
             System.out.println("⚠️  No se encontraron imágenes, se usará dibujo por colores.");
         }
@@ -138,7 +137,7 @@ public class SimulacionAgenteGUI extends JFrame {
         for (int i = 0; i < filas; i++) {
             for (int j = 0; j < columnas; j++) {
                 int valor = matriz[i][j];
-                
+
                 Image imagen = imagenes.get(valor);
 
                 if (imagen != null) {

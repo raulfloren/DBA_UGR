@@ -8,10 +8,9 @@ import comportamientos.Validacion;
 import jade.core.Agent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+//import java.util.HashSet;
 import movimientos.Movimientos;
-import static movimientos.Movimientos.*;
+//import static movimientos.Movimientos.*;
 
 public class Agente extends Agent {
 
@@ -27,15 +26,17 @@ public class Agente extends Agent {
     private Movimientos movimientoDecidido; // se modifciara en decidirMov()
     private Posicion posAnterior; //Para dibujar rastro
 
-    // Memoria del agente
+    // Memoria del agente (para LRTA*)
+    // Almacena el coste heurístico aprendido (H) para cada posición
+    private HashMap<Posicion, Double> memoriaHeuristica;
+
     private HashMap<Posicion, Integer> memoriaVisitadas;
-    private HashSet<Posicion> memoriaVistas;
+    private static final double PENALTY_VISITADA = 0.4; // Penalización pequeña
 
-    private static final int PESO_DISTANCIA = 5;
-    private static final int PESO_MEMORIA = 7;
+    // Coste de dar un paso
+    private static final double COSTE_ENERGIA = 1.0;
 
-    private static final int PENALTY_VISITADA = 7;
-    private static final int PENALTY_VISTA = 2;
+    private Movimientos ultimoMovimiento = null;
 
     // Constructor
     public Agente(Posicion posAgente, Posicion posObjetivo, Sensores sensores) {
@@ -45,8 +46,8 @@ public class Agente extends Agent {
         this.casillasDisponibles = new ArrayList<>();
         this.movimientoDecidido = null;
 
+        this.memoriaHeuristica = new HashMap<>();
         this.memoriaVisitadas = new HashMap<>();
-        this.memoriaVistas = new HashSet<>();
 
     }
 
@@ -107,69 +108,152 @@ public class Agente extends Agent {
         this.casillasDisponibles = sensores.verCasillasDisponibles();
     }
 
-    // Decidir movimiento
-    public void decidirMov() {
-        Map<Movimientos, Double> costesCasilla = new HashMap<>();
-
-        for (Movimientos mov : casillasDisponibles) {
-            System.out.println("  AAAAAAAAAAAAAAAA:" + mov.toString() + "BBBBB");
-            costesCasilla.put(mov, calcularCosteMov(mov));
-        }
-
-        Movimientos mejorMovimiento = null;
-        double menorCoste = Double.MAX_VALUE;
-
-        for (Map.Entry<Movimientos, Double> entry : costesCasilla.entrySet()) {
-            Movimientos mov = entry.getKey();
-            double coste = entry.getValue();
-
-            // Imprime un log útil para depurar
-            System.out.println(String.format("  -> Opción: %s, Costo: %.2f", mov, coste));
-
-            if (coste < menorCoste) {
-                // Encontramos un nuevo coste mínimo
-                menorCoste = coste;
-                mejorMovimiento = mov;
-            }
-        }
-
-        this.movimientoDecidido = mejorMovimiento;
-
-        System.out.println("==> Movimiento Decidido: " + this.movimientoDecidido);
+    // --- LÓGICA DE DECISIÓN LRTA* ---
+    // Posicion simulada despues de un movimiento
+    private Posicion getProximaPosicion(Movimientos mov) {
+        Posicion posTrasMov = switch (mov) {
+            case UP ->
+                new Posicion(posAgente.getFila() - 1, posAgente.getColumna());
+            case DOWN ->
+                new Posicion(posAgente.getFila() + 1, posAgente.getColumna());
+            case LEFT ->
+                new Posicion(posAgente.getFila(), posAgente.getColumna() - 1);
+            case RIGHT ->
+                new Posicion(posAgente.getFila(), posAgente.getColumna() + 1);
+        };
+        return posTrasMov;
     }
 
-    // Distancia al objetivo tras hacer el movimiento siguiente 
-    private double calcularCosteMov(Movimientos mov) {
+    /**
+     * Obtiene el valor heurístico H(n) de una posición. Si no está en la
+     * memoria, la calcula (Manhattan), la guarda y la devuelve.
+     */
+    private double getHeuristica(Posicion pos) {
+        // Usamos computeIfAbsent para obtener el valor si existe, 
+        // o para calcularlo, guardarlo y devolverlo si no existe.
+        return memoriaHeuristica.computeIfAbsent(pos, p -> {
+            // Valor heurístico inicial: Distancia Manhattan
+            return (double) distanciaManhattan(p, posObjetivo);
 
-        Posicion posTrasMov = new Posicion(posAgente.getFila(), posAgente.getColumna());
+        });
+    }
 
-        switch (mov) {
-            case UP ->
-                posTrasMov.setFila(posAgente.getFila() - 1);
-            case DOWN ->
-                posTrasMov.setFila(posAgente.getFila() + 1);
-            case LEFT ->
-                posTrasMov.setColumna(posAgente.getColumna() - 1);
-            case RIGHT ->
-                posTrasMov.setColumna(posAgente.getColumna() + 1);
+    private double calcularCostePaso(Posicion proximaPos) {
+        double h = getHeuristica(proximaPos);  // obtenemos la heurística base
+
+        // Si nunca se ha visitado, el coste es normal
+        if (!memoriaVisitadas.containsKey(proximaPos)) {
+            return COSTE_ENERGIA;
         }
 
-        double costeDistancia = distanciaManhattan(posTrasMov, posObjetivo);
-        costeDistancia += distanciaEuclidea(posTrasMov, posObjetivo);
+        // Si ya se ha visitado, aplicamos penalización dinámica
+        int veces = memoriaVisitadas.getOrDefault(proximaPos, 0);
 
-        int costeMemoria;
+        // Penalización progresiva: cuanto más se visita, más caro es
+        double penalizacionDinamica = h * (PENALTY_VISITADA * veces);
 
-        if (memoriaVisitadas.containsKey(posTrasMov)) {        // Si la hemos visitado ya y la vamos a visitar de nuevo
-            int visitas = memoriaVisitadas.getOrDefault(posTrasMov, 0) + 1;
-            costeMemoria = PENALTY_VISITADA * visitas;
-        } else if (memoriaVistas.contains(posTrasMov)) {        // Si la hemos visto ya y nos vamos a mover a ella 
-            costeMemoria = PENALTY_VISTA;
-        } else {                                                    // No hemos visitado la celda, ni la gemos visto anteriormente
-            costeMemoria = 0;
+        return COSTE_ENERGIA + penalizacionDinamica;
+    }
+
+    // Decidir movimiento (LRTA*)
+    public void decidirMov() {
+
+        double minCosteDecision = Double.MAX_VALUE;    // El 'f_dec' más bajo encontrado
+        double minCosteAprendizaje = Double.MAX_VALUE; // El 'f_apr' más bajo para aprender
+        double minCosteEuclideo = Double.MAX_VALUE;   // El 'tie-breaker' euclídeo
+        Movimientos mejorMovimiento = null;
+
+        double H_actual = getHeuristica(posAgente); // H de la casilla actual
+
+        Posicion posPrev = posAnterior;
+
+        for (Movimientos mov : casillasDisponibles) {
+            Posicion proximaPos = getProximaPosicion(mov);
+            double H_proximaPos = getHeuristica(proximaPos);
+
+            if (posPrev != null && proximaPos.equals(posPrev)) {
+                continue; // evita volver atrás directamente
+            }
+
+            // --- 1. Coste para Aprender (Puro) ---
+            double costeF_Aprendizaje = COSTE_ENERGIA + H_proximaPos;
+
+            // !! AQUÍ ESTÁ EL BUG CORREGIDO !!
+            if (costeF_Aprendizaje < minCosteAprendizaje) {
+                minCosteAprendizaje = costeF_Aprendizaje; // <-- Corregido
+            }
+
+            // --- 2. Coste para Decidir (Con Penalización) ---
+            // k será 1.0 (nuevo) o 2.0 (visitado)
+            double K_costePaso_conPenalizacion = calcularCostePaso(proximaPos);
+            double dx = posObjetivo.getColumna() - posAgente.getColumna();
+            double dy = posObjetivo.getFila() - posAgente.getFila();
+            double dirX = Math.signum(dx), dirY = Math.signum(dy);
+
+            Posicion next = getProximaPosicion(mov);
+            double preferenciaDireccion = 0;
+            if (dirX != 0 && Math.signum(next.getColumna() - posAgente.getColumna()) == dirX) {
+                preferenciaDireccion -= 0.2;
+            }
+            if (dirY != 0 && Math.signum(next.getFila() - posAgente.getFila()) == dirY) {
+                preferenciaDireccion -= 0.2;
+            }
+
+            // 2.b. Preferencia por Momentum (Inercia)
+            // Damos un bonus (coste negativo) si el movimiento actual
+            // es el mismo que el último movimiento realizado.
+            // Esto "pega" al agente a una dirección (ej. seguir pegado al muro).
+            double preferenciaMomentum = 0;
+            if (ultimoMovimiento != null && mov == ultimoMovimiento) {
+                // Fuerte preferencia por seguir recto
+                preferenciaMomentum = -0.1; // Ajusta este valor si es necesario
+            }
+
+            //double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion;
+            double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion + preferenciaMomentum;
+
+            // --- 3. Lógica de Decisión con Desempate ---
+            if (costeF_Decision < minCosteDecision) {
+                // A. Es un nuevo coste mínimo. Es el mejor movimiento.
+                minCosteDecision = costeF_Decision;
+                minCosteEuclideo = distanciaEuclidea(proximaPos, posObjetivo); // Guardamos su Euclídea
+                mejorMovimiento = mov;
+
+            } else if (Math.abs(costeF_Decision - minCosteDecision) < 0.001) { // Comparación segura de doubles
+                // B. Es un EMPATE. Usamos el desempate Euclídeo.
+                double costeEuclideoActual = distanciaEuclidea(proximaPos, posObjetivo);
+
+                if (costeEuclideoActual < minCosteEuclideo) {
+                    // Este movimiento gana el desempate
+                    // System.out.println(String.format("    -> GANA DESEMPATE EUCLÍDEO (Actual: %.2f < Anterior: %.2f)",
+                    //       costeEuclideoActual, minCosteEuclideo));
+                    minCosteEuclideo = costeEuclideoActual;
+                    mejorMovimiento = mov;
+                }
+            }
+        } // --- Fin del bucle for ---
+
+        // --- 4. ¡El aprendizaje! (Monótono y Puro) ---
+        if (!casillasDisponibles.isEmpty()) {
+            Posicion posActualCopia = new Posicion(posAgente);
+
+            // Aprendizaje LRTA* clásico pero reforzado
+            // ¡¡ARREGLO!! minCosteAprendizaje YA incluye el COSTE_ENERGIA.
+            double H_nuevo = Math.max(H_actual, minCosteAprendizaje);
+
+            /*
+            // Refuerzo: si el incremento es demasiado pequeño, aumenta un poco más
+            // (Esta lógica de refuerzo ahora funcionará correctamente)
+            double incremento = Math.abs(H_nuevo - H_actual);
+            if (incremento < 1.0) {
+                H_nuevo += 1.0; // refuerzo mínimo para acelerar el aprendizaje en zonas repetitivas
+            }
+             */
+            memoriaHeuristica.put(posActualCopia, H_nuevo);
         }
 
-        return (PESO_DISTANCIA * costeDistancia) + (PESO_MEMORIA * costeMemoria);
-
+        // --- 5. Establecer el movimiento decidido ---
+        this.movimientoDecidido = mejorMovimiento;
     }
 
     // Distancia Manhattan desde la posAgente hasta la posIbjetivo
@@ -189,55 +273,60 @@ public class Agente extends Agent {
         // Guardamos la posicion anterior para actulizar el entorno y la GUI
         posAnterior = new Posicion(posAgente);
 
+        if (movimientoDecidido == null) {
+            // Esto puede pasar si el agente está atrapado
+            System.err.println("¡AGENTE ATRAPADO! No hay movimiento decidido.");
+            // Opcionalmente, podrías forzar el fin del agente aquí
+            // doDelete();
+            return;
+        }
         switch (movimientoDecidido) {
-            case UP:
+            case UP ->
                 posAgente.setFila(posAgente.getFila() - 1);  // Arriba
-                break;
 
-            case DOWN:
+            case DOWN ->
                 posAgente.setFila(posAgente.getFila() + 1);  // Abajo
-                break;
 
-            case LEFT:
+            case LEFT ->
                 posAgente.setColumna(posAgente.getColumna() - 1);  // Izquierda
-                break;
 
-            case RIGHT:
+            case RIGHT ->
                 posAgente.setColumna(posAgente.getColumna() + 1);  // Derecha
-                break;
 
         }
 
         sensores.addEnergia();
+
+        this.ultimoMovimiento = this.movimientoDecidido;
     }
 
-    // --- MÉTODOS DE MEMORIA ---
-    // Casillas vistas y visitadas por el agente
     public void updateMemoriaVisitadas() {
+        // Usamos posAnterior porque la memoria se actualiza DESPUÉS de moverse
+        // No, espera, se actualiza en HacerMov, ANTES de moverse... 
+        // No, HacerMov actualiza posAgente. 
+        // Vamos a actualizar la memoria en 'HacerMov' DESPUÉS de que se mueva.
+
+        // Miento, 'HacerMov.java' lo llama *después* de 'agente.hacerMov()'.
+        // Así que 'posAgente' ya es la *nueva* posición.
         Posicion posActualCopia = new Posicion(posAgente);
         memoriaVisitadas.put(posActualCopia, memoriaVisitadas.getOrDefault(posActualCopia, 0) + 1);
     }
 
-    public void updateMemoriaVistas() {
-        ArrayList<Posicion> casillasVistas = sensores.getCasillasVistas();
-        for (Posicion pos : casillasVistas) {
-            memoriaVistas.add(new Posicion(pos));
-        }
-    }
-
+    // --- MÉTODOS DE MEMORIA ---
     public void imprimirMemoria() {
-        System.out.println("Memoria del Agente:");
-        for (HashMap.Entry<Posicion, Integer> entry : memoriaVisitadas.entrySet()) {
+        // Actualizado para imprimir la nueva memoria
+        for (HashMap.Entry<Posicion, Double> entry : memoriaHeuristica.entrySet()) {
             Posicion posicion = entry.getKey();
-            Integer vecesPasadas = entry.getValue();
-            System.out.println(String.format("Posición: %d %d, Veces Pasadas: %d", posicion.getFila(), posicion.getColumna(), vecesPasadas));
+            Double heuristica = entry.getValue();
+            //System.out.println(String.format("Posición: (%d, %d), H aprendido: %.2f",
+            //      posicion.getFila(), posicion.getColumna(), heuristica));
         }
     }
 
     @Override
     protected void takeDown() {
         System.out.println("Agente " + getAID().getLocalName() + " terminando (takeDown).");
-
+        imprimirMemoria(); // Imprime la memoria aprendida al final
         // Cierra la ventana de la GUI (por si acaso no se cerró)
         if (GUI != null) {
             GUI.dispose();

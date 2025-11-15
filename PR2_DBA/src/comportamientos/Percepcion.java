@@ -14,7 +14,7 @@ public class Percepcion extends Behaviour {
     @Override
     public void action() {
         agente.verCasillasDisponibles();
-        agente.updateMemoriaVistas();
+        // agente.updateMemoriaVistas();
     }
 
     @Override
