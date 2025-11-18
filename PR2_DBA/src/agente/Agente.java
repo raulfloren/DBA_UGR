@@ -68,7 +68,7 @@ public class Agente extends Agent {
             doDelete();
         }
 
-        //percepción → decisión → acción → validación, 
+        // percepción → decisión → acción → validación, 
         addBehaviour(new Percepcion(this));
         addBehaviour(new DecisionMov(this));
         addBehaviour(new HacerMov(this));
@@ -175,14 +175,14 @@ public class Agente extends Agent {
                 continue;
             }
 
-            // --- 1. Coste para Aprender (Puro) ---
+            // --- 1. Coste inicial ---
             double costeF_Aprendizaje = COSTE_ENERGIA + H_proximaPos;
 
             if (costeF_Aprendizaje < minCosteAprendizaje) {
                 minCosteAprendizaje = costeF_Aprendizaje;
             }
 
-            // --- 2. Coste para Decidir (Con Penalización) ---
+            // --- 2. Bonificación de dirección ---
             // k será 1.0 (nuevo) o 2.0 (visitado)
             double K_costePaso_conPenalizacion = calcularCostePaso(proximaPos);
             double dx = posObjetivo.getColumna() - posAgente.getColumna();
@@ -198,20 +198,19 @@ public class Agente extends Agent {
                 preferenciaDireccion -= 0.2;
             }
 
-            // 2.b. Preferencia por Momentum (Inercia)
+            // 3. Momentum (Inercia)
             // Damos un bonus (coste negativo) si el movimiento actual
             // es el mismo que el último movimiento realizado.
-            // Esto "pega" al agente a una dirección (ej. seguir pegado al muro).
+            // Esto "pega" al agente a una dirección (ej. seguir pegado al muro)
             double preferenciaMomentum = 0;
             if (ultimoMovimiento != null && mov == ultimoMovimiento) {
                 // Fuerte preferencia por seguir recto
                 preferenciaMomentum = -0.1; // Ajusta este valor si es necesario
             }
 
-            //double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion;
             double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion + preferenciaMomentum;
 
-            // --- 3. Lógica de Decisión con Desempate ---
+            // --- 4. Lógica de Decisión con Desempate ---
             if (costeF_Decision < minCosteDecision) {
                 // A. Es un nuevo coste mínimo. Es el mejor movimiento.
                 minCosteDecision = costeF_Decision;
@@ -232,21 +231,10 @@ public class Agente extends Agent {
             }
         }
 
-        // --- 4. ¡El aprendizaje! (Monótono y Puro) ---
+        // --- 4. Aprendizaje: Actualización del coste en la posición actual ---
         if (!casillasDisponibles.isEmpty()) {
             Posicion posActualCopia = new Posicion(posAgente);
-
-            // Aprendizaje LRTA* clásico pero reforzado
             double H_nuevo = Math.max(H_actual, minCosteAprendizaje);
-
-            /*
-            // Refuerzo: si el incremento es demasiado pequeño, aumenta un poco más
-            // (Esta lógica de refuerzo ahora funcionará correctamente)
-            double incremento = Math.abs(H_nuevo - H_actual);
-            if (incremento < 1.0) {
-                H_nuevo += 1.0; // refuerzo mínimo para acelerar el aprendizaje en zonas repetitivas
-            }
-             */
             memoriaHeuristica.put(posActualCopia, H_nuevo);
         }
 
@@ -272,10 +260,7 @@ public class Agente extends Agent {
         posAnterior = new Posicion(posAgente);
 
         if (movimientoDecidido == null) {
-            // Esto puede pasar si el agente está atrapado
             System.err.println("¡AGENTE ATRAPADO! No hay movimiento decidido.");
-            // Opcionalmente, podrías forzar el fin del agente aquí
-            // doDelete();
             return;
         }
         switch (movimientoDecidido) {
@@ -299,20 +284,11 @@ public class Agente extends Agent {
     }
 
     public void updateMemoriaVisitadas() {
-        // Usamos posAnterior porque la memoria se actualiza DESPUÉS de moverse
-        // No, espera, se actualiza en HacerMov, ANTES de moverse... 
-        // No, HacerMov actualiza posAgente. 
-        // Vamos a actualizar la memoria en 'HacerMov' DESPUÉS de que se mueva.
-
-        // Miento, 'HacerMov.java' lo llama *después* de 'agente.hacerMov()'.
-        // Así que 'posAgente' ya es la *nueva* posición.
         Posicion posActualCopia = new Posicion(posAgente);
         memoriaVisitadas.put(posActualCopia, memoriaVisitadas.getOrDefault(posActualCopia, 0) + 1);
     }
 
-    // --- MÉTODOS DE MEMORIA ---
     public void imprimirMemoria() {
-        // Actualizado para imprimir la nueva memoria
         for (HashMap.Entry<Posicion, Double> entry : memoriaHeuristica.entrySet()) {
             Posicion posicion = entry.getKey();
             Double heuristica = entry.getValue();
