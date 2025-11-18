@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Check if an argument was provided
+if [ -z "$1" ]; then
+    echo "Error: Please provide the map ID as an argument."
+    echo "Usage: ./run_map.sh <id>"
+    echo "Available IDs: 0, 9, 10, 11, 12, 13, 14, 15, 16, 17"
+    exit 1
+fi
+
+echo "---------------------------------------------------"
+
+case $1 in
+    0)
+        echo "INFO: map: mapWithoutObstacle.txt | teacher's: 98 our's: 98"
+        echo "EXECUTING: make 0 AGENTX=49 AGENTY=49 GOALX=0 GOALY=0"
+        echo "---------------------------------------------------"
+        make 0 AGENTX=49 AGENTY=49 GOALX=0 GOALY=0
+        ;;
+    1)
+        echo "INFO: map: mapHorizontal.txt | teacher's: 85 our's: 105 (old), 85"
+        echo "EXECUTING: make 9 AGENTX=30 AGENTY=49 GOALX=30 GOALY=0"
+        echo "---------------------------------------------------"
+        make 9 AGENTX=30 AGENTY=49 GOALX=30 GOALY=0
+        ;;
+    2)
+        echo "INFO: map: mapVertical.txt | teacher's: 103 our's: 103"
+        echo "EXECUTING: make 10 AGENTX=0 AGENTY=25 GOALX=49 GOALY=25"
+        echo "---------------------------------------------------"
+        make 10 AGENTX=0 AGENTY=25 GOALX=49 GOALY=25
+        ;;
+    3)
+        echo "INFO: map: mapTriangleBig.txt | teacher's: 193 our's: 2193 (old), 1083"
+        echo "EXECUTING: make 11 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0"
+        echo "---------------------------------------------------"
+        make 11 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0
+        ;;
+    4)
+        echo "INFO: map: mapComplex1.txt | teacher's: 381 our's: 853 (old), 711"
+        echo "EXECUTING: make 12 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0"
+        echo "---------------------------------------------------"
+        make 12 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0
+        ;;
+    5)
+        echo "INFO: map: mapComplex2.txt | teacher's: 107 our's: 107"
+        echo "EXECUTING: make 13 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0"
+        echo "---------------------------------------------------"
+        make 13 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0
+        ;;
+    6)
+        echo "INFO: map: mapComplex3.txt | teacher's: 162 our's: 456 (old), 1476"
+        echo "EXECUTING: make 14 AGENTX=49 AGENTY=17 GOALX=3 GOALY=15"
+        echo "---------------------------------------------------"
+        make 14 AGENTX=49 AGENTY=17 GOALX=3 GOALY=15
+        ;;
+    7)
+        echo "INFO: map: mapComplex4.txt | teacher's: 178 our's: 1194 (old), 404"
+        echo "EXECUTING: make 15 AGENTX=49 AGENTY=27 GOALX=15 GOALY=39"
+        echo "---------------------------------------------------"
+        make 15 AGENTX=49 AGENTY=27 GOALX=15 GOALY=39
+        ;;
+    8)
+        echo "INFO: map: mapComplex5.txt | teacher's: 102 our's: 870 (old), 920"
+        echo "EXECUTING: make 16 AGENTX=25 AGENTY=49 GOALX=25 GOALY=37"
+        echo "---------------------------------------------------"
+        make 16 AGENTX=25 AGENTY=49 GOALX=25 GOALY=37
+        ;;
+    9)
+        echo "INFO: map: mapComplex6.txt | teacher's: 176 our's: 816 (old), 884"
+        echo "EXECUTING: make 17 AGENTX=24 AGENTY=31 GOALX=25 GOALY=34"
+        echo "---------------------------------------------------"
+        make 17 AGENTX=24 AGENTY=31 GOALX=25 GOALY=34
+        ;;
+    *)
+        echo "Error: Invalid ID '$1'"
+        echo "Available IDs: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9"
+        exit 1
+        ;;
+esac

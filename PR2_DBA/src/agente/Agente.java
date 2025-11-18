@@ -8,9 +8,7 @@ import comportamientos.Validacion;
 import jade.core.Agent;
 import java.util.ArrayList;
 import java.util.HashMap;
-//import java.util.HashSet;
 import movimientos.Movimientos;
-//import static movimientos.Movimientos.*;
 
 public class Agente extends Agent {
 
@@ -133,7 +131,7 @@ public class Agente extends Agent {
         // o para calcularlo, guardarlo y devolverlo si no existe.
         return memoriaHeuristica.computeIfAbsent(pos, p -> {
             // Valor heurístico inicial: Distancia Manhattan
-            return (double) distanciaManhattan(p, posObjetivo);
+            return (double) ((distanciaManhattan(p, posObjetivo) + distanciaEuclidea(p, posObjetivo)) / 2);
 
         });
     }
@@ -167,20 +165,21 @@ public class Agente extends Agent {
 
         Posicion posPrev = posAnterior;
 
+        // Para cada posible movimiento, estudiamos su factibilidad
         for (Movimientos mov : casillasDisponibles) {
             Posicion proximaPos = getProximaPosicion(mov);
             double H_proximaPos = getHeuristica(proximaPos);
 
+            // Comprobación para no volver atrás
             if (posPrev != null && proximaPos.equals(posPrev)) {
-                continue; // evita volver atrás directamente
+                continue;
             }
 
             // --- 1. Coste para Aprender (Puro) ---
             double costeF_Aprendizaje = COSTE_ENERGIA + H_proximaPos;
 
-            // !! AQUÍ ESTÁ EL BUG CORREGIDO !!
             if (costeF_Aprendizaje < minCosteAprendizaje) {
-                minCosteAprendizaje = costeF_Aprendizaje; // <-- Corregido
+                minCosteAprendizaje = costeF_Aprendizaje;
             }
 
             // --- 2. Coste para Decidir (Con Penalización) ---
@@ -231,14 +230,13 @@ public class Agente extends Agent {
                     mejorMovimiento = mov;
                 }
             }
-        } // --- Fin del bucle for ---
+        }
 
         // --- 4. ¡El aprendizaje! (Monótono y Puro) ---
         if (!casillasDisponibles.isEmpty()) {
             Posicion posActualCopia = new Posicion(posAgente);
 
             // Aprendizaje LRTA* clásico pero reforzado
-            // ¡¡ARREGLO!! minCosteAprendizaje YA incluye el COSTE_ENERGIA.
             double H_nuevo = Math.max(H_actual, minCosteAprendizaje);
 
             /*

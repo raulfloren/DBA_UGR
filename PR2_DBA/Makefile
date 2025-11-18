@@ -20,7 +20,17 @@ MAPS = mapWithoutObstacle.txt \
        mapWithComplexObstacle2.txt \
        mapWithComplexObstacle3.txt \
        mapWithComplexObstacle4.txt \
-       mapita.txt
+       mapita.txt \
+	   mapHorizontal.txt \
+	   mapVertical.txt \
+	   mapTriangleBig.txt \
+	   mapComplex1.txt \
+	   mapComplex2.txt \
+	   mapComplex3.txt \
+	   mapComplex4.txt \
+	   mapComplex5.txt \
+	   mapComplex6.txt
+
 
 # Posiciones del agente y del objetivo
 AGENTX = 2
@@ -28,7 +38,7 @@ AGENTY = 2
 GOALX  = 7
 GOALY  = 7
 
-.PHONY: all compile clean 0 1 2 3 4 5 6 7 8
+.PHONY: all compile clean 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
 
 all: compile
 
@@ -46,7 +56,7 @@ clean:
 		printf "$(YELLOW)🧹 Archivos compilados eliminados$(RESET)\n"
 
 # Ejecutar mapas según índice
-0 1 2 3 4 5 6 7 8:
+0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17:
 	@IDX=$@ ; \
 	MAPFILE=$$(echo $(MAPS) | cut -d' ' -f$$((IDX+1))) ; \
 	printf "$(YELLOW)Ejecutando mapa: $$MAPFILE$(RESET)\n"; \
@@ -95,3 +105,34 @@ clean:
 #   make 7 AGENTX=40 AGENTY=49 GOALX=11 GOALY=21    117         177
 #   make 7 AGENTX=35 AGENTY=49 GOALX=40 GOALY=4     130         128
 
+
+# ====================================== MAPAS PARA LA DEFENSA ======================================
+# map: mapWithoutObstacle.txt | teacher's: 98 our's: 98
+# make 0 AGENTX=49 AGENTY=49 GOALX=0 GOALY=0
+
+# map: mapHorizontal.txt | teacher's: 85 our's: 105
+# make 9 AGENTX=30 AGENTY=49 GOALX=30 GOALY=0
+
+# map: mapVertical.txt | teacher's: 103 our's: 103 
+# make 10 AGENTX=0 AGENTY=25 GOALX=49 GOALY=25
+
+# map: mapTriangleBig.txt | teacher's: 193 our's: 2193
+# make 11 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0
+
+# map: mapComplex1.txt | teacher's: 381 our's: 853
+# make 12 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0
+
+# map: mapComplex2.txt | teacher's: 107 our's: 107
+# make 13 AGENTX=30 AGENTY=49 GOALX=40 GOALY=0
+
+# map: mapComplex3.txt | teacher's: 162 our's: 456
+# make 14 AGENTX=49 AGENTY=17 GOALX=3 GOALY=15
+
+# map: mapComplex4.txt | teacher's: 178 our's: 1194
+# make 15 AGENTX=49 AGENTY=27 GOALX=15 GOALY=39
+
+# map: mapComplex5.txt | teacher's: 102 our's: 870
+# make 16 AGENTX=25 AGENTY=49 GOALX=25 GOALY=37
+
+# map: mapComplex6.txt | teacher's: 176 our's: 816
+# make 17 AGENTX=24 AGENTY=31 GOALX=25 GOALY=34
