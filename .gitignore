@@ -1,4 +1,4 @@
-*.txt
+/PR2_DBA/*.txt
 *.mf
 /PR2_DBA/nbproject/private/
 /PR2_DBA/build/
