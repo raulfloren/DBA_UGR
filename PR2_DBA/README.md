@@ -1,5 +1,4 @@
-# 🤖 Navegación de Agente Autónomo en un Mundo 2D
-## Práctica 2: Movimiento de un Agente en un Mundo Bidimensional
+# Práctica 2: Movimiento de un Agente en un Mundo Bidimensional
 
 [![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/en/)
 [![JADE](https://img.shields.io/badge/JADE-Agent%20Framework-00A2E8?style=for-the-badge&logo=jfrog&logoColor=white)](http://jade.tilab.com/)
