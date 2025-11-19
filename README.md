@@ -11,8 +11,8 @@ Utiliza los siguientes enlaces para navegar a la documentación detallada y al c
 
 | Práctica | Título Principal | Descripción Breve | Enlace a la Documentación |
 | :---: | :--- | :--- | :---: |
-| **P2** | **Movimiento de una agente en un mundo bidimensional** | Implementación de un agente inteligente para el movimiento y la búsqueda de objetivos en un mundo bidimensional utilizando la estrategia LRTA\* (Learning Real-Time A\*). | [Ir a la P2 README](./PR2_DBA\README.md) |
-| **P3** | TBA | [Future topic] | [P3 README](./P3/README.md) |
+| **P2** | **Movimiento de una agente en un mundo bidimensional** | Implementación de un agente inteligente para el movimiento y la búsqueda de objetivos en un mundo bidimensional utilizando la estrategia LRTA\* (Learning Real-Time A\*). | [Ir a la P2](./PR2_DBA/README.md) |
+| **P3** | TBA | [Future topic] | [Ir a la P3](./P3/README.md) |
 
 ---
 
