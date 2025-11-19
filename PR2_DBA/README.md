@@ -73,8 +73,8 @@ Antes de moverse a la posición elegida, el agente actualiza el valor heurístic
 ### Ejecutar el Proyecto
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://docs.github.com/es/repositories/creating-and-managing-repositories/quickstart-for-repositories](https://docs.github.com/es/repositories/creating-and-managing-repositories/quickstart-for-repositories)
     cd [Tu Carpeta de Proyecto]
+    git clone https://github.com/raulfloren/DBA_UGR/tree/develop
     ```
 2.  **Compilar y Ejecutar:**
     Para compilación y ejecución, usaremos el Makefile.
