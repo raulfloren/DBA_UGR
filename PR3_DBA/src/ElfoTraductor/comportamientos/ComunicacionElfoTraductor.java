@@ -2,7 +2,6 @@ package ElfoTraductor.comportamientos;
 
 import ElfoTraductor.ElfoTraductor;
 import herramientas.GestorAgentes;
-import herramientas.Posicion;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
@@ -23,40 +22,17 @@ public class ComunicacionElfoTraductor extends Behaviour {
         super(agent);
         this.agenteElfo = agent;
         this.estados = EstadosElfoTraductor.ESPERANDO_A_TRADUCIR;
-        this.doHandshake();
-    }
-
-    private void doHandshake() {
-        boolean conexionEstablecidaAgente = false;
-        AID[] agentes = null;
-
-        while (!conexionEstablecidaAgente) {
-
-            // Buscar los agentes de tipo PLAYER (solo hay uno)
-            agentes = GestorAgentes.buscarAgentes(this.agenteElfo, "PLAYER");
-            if (agentes.length == 1) { // Número esperado de servicios
-                conexionEstablecidaAgente = true;
-            } else {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
-
-        this.agente = GestorAgentes.buscarAgenteEnLista(agentes, "salvador");
-
     }
 
     @Override
     public void action() {
         String mensajeTraducido;
 
-        switch (this.paso) {
-            case ESPERANDO_MENSAJE_BARCO:
-                msgBarco = agente.blockingReceive();
+        switch (estados) {
+            
+            case ESPERANDO_A_TRADUCIR:
+                              
+                msgAgente = agente.blockingReceive(); //  Espera el mensaje del agente
 
                 if (msgBarco != null && msgBarco.getPerformative() == ACLMessage.REQUEST) {
 

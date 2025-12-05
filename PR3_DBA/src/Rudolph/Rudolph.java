@@ -24,8 +24,8 @@ public class Rudolph extends Agent {
             this.g = (SimulacionAgenteGUI) args[0];
             this.posRenosPerdidos = (ArrayList<Posicion>) args[1];
         } else {
-            System.out.println("Error: Parámetros de inicialización insuficientes para el agente.");
-            doDelete(); // Eliminar agente si los parámetros son insuficientes
+            System.out.println("Error: Rudolph Parámetros.");
+            doDelete(); // Eliminar el agente
             return;
         }
 
