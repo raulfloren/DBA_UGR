@@ -18,9 +18,9 @@ public class GestorComunicaciones {
         String msg;
 
         if (confirma) {
-            msg = "Hyvää joulua, eres un crack. ID [" + idConv + "]. Nähdään pian.";
+            msg = "Hyvää joulua, Eres un crack valiente. ID [" + idConv + "]. Nähdään pian.";
         } else {
-            msg = "Hyvää joulua, perdio. Nähdään pian.";
+            msg = "Hyvää joulua, Estamos acabados. Nähdään pian.";
         }
 
         return msg;

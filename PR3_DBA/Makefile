@@ -2,7 +2,7 @@
 
 SRC_DIR = src
 BUILD_DIR = build/classes
-MAIN_CLASS = main.PR2_DBA
+MAIN_CLASS = main.PR3_DBA
 JADE_LIB = lib/jade.jar
 
 # Colores

@@ -26,4 +26,8 @@ public class ElfoTraductor extends Agent {
 
         addBehaviour(new ComunicacionElfoTraductor(this));
     }
+
+    public SimulacionAgenteGUI getGraficos() {
+        return g;
+    }
 }

@@ -1,6 +1,8 @@
 package entorno;
 
 import herramientas.Posicion;
+import movimientos.Movimientos;
+import static movimientos.Movimientos.*;
 
 public class Entorno {
 
@@ -34,5 +36,22 @@ public class Entorno {
         this.posAgente = posAgente;
         mapa.ponerItemEnMapa(posAgente, AGENTE_ID);
         mapa.ponerItemEnMapa(posAnterior, CAMINO_ID);
+    }
+
+    public void mueveAgente(Movimientos mov) {
+        switch (mov) {
+            case UP ->
+                posAgente.setFila(posAgente.getFila() - 1);  // Arriba
+
+            case DOWN ->
+                posAgente.setFila(posAgente.getFila() + 1);  // Abajo
+
+            case LEFT ->
+                posAgente.setColumna(posAgente.getColumna() - 1);  // Izquierda
+
+            case RIGHT ->
+                posAgente.setColumna(posAgente.getColumna() + 1);  // Derecha
+
+        }
     }
 }

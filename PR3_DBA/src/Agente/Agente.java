@@ -11,6 +11,7 @@ import jade.core.Agent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import movimientos.Movimientos;
+import static movimientos.Movimientos.*;
 
 public class Agente extends Agent {
 
@@ -75,6 +76,7 @@ public class Agente extends Agent {
         addBehaviour(new DecisionMov(this));
         addBehaviour(new HacerMov(this));
         addBehaviour(new Validacion(this, sensores.getEntorno()));
+        addBehaviour(new ComunicacionAgente(this));
 
     }
 
@@ -267,16 +269,16 @@ public class Agente extends Agent {
         }
         switch (movimientoDecidido) {
             case UP ->
-                posAgente.setFila(posAgente.getFila() - 1);  // Arriba
+                sensores.move(UP);
 
             case DOWN ->
-                posAgente.setFila(posAgente.getFila() + 1);  // Abajo
+                sensores.move(DOWN);
 
             case LEFT ->
-                posAgente.setColumna(posAgente.getColumna() - 1);  // Izquierda
+                sensores.move(LEFT);
 
             case RIGHT ->
-                posAgente.setColumna(posAgente.getColumna() + 1);  // Derecha
+                sensores.move(RIGHT);
 
         }
 

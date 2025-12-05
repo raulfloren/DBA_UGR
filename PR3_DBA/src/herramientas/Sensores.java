@@ -79,4 +79,8 @@ public class Sensores {
     public ArrayList<Posicion> getCasillasVistas() {
         return casillasVistas;
     }
+
+    public void move(Movimientos mov) {
+        entorno.mueveAgente(mov);
+    }
 }

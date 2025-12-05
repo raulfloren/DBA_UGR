@@ -13,7 +13,6 @@ public class ComunicacionRudolph extends Behaviour {
     private final String CONVERSACION_AGENTE_RUDOLPH_ID = "salvador-rudolph-conversacion";
 
     private final Rudolph agenteRudolph;
-    private final EstadosRudolph estados;
 
     private boolean fin;
 
@@ -23,7 +22,6 @@ public class ComunicacionRudolph extends Behaviour {
     public ComunicacionRudolph(Rudolph agent) {
         super(agent);
         this.agenteRudolph = agent;
-        this.estados = EstadosRudolph.ESPERANDO_AL_AGENTE;
         this.doHandshake();
     }
 
@@ -54,48 +52,37 @@ public class ComunicacionRudolph extends Behaviour {
     @Override
     public void action() {
 
-        switch (estados) {
+        msgAgente = agenteRudolph.blockingReceive();
+        String posReno = "Bro, no quedan renos perdidos. En plan.";
 
-            case ESPERANDO_AL_AGENTE -> {
-                msgAgente = agenteRudolph.blockingReceive();
-                String posReno = "Bro, no quedan renos perdidos. En plan.";
+        if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) {
 
-                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) {
+            if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeAgente(msgAgente.getContent())) {
 
-                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeAgente(msgAgente.getContent())) {
+                if (!msgAgente.getConversationId().equals(CONVERSACION_AGENTE_RUDOLPH_ID)) {      // Si no es el codigo correcto
+                    msgAgente = msgAgente.createReply(ACLMessage.NOT_UNDERSTOOD);
+                    msgAgente.setContent("Bro, no puedo ayudarte. En plan.");
 
-                        if (!msgAgente.getConversationId().equals(CONVERSACION_AGENTE_RUDOLPH_ID)) {      // Si no es el codigo correcto
-                            msgAgente = msgAgente.createReply(ACLMessage.NOT_UNDERSTOOD);
-                            msgAgente.setContent("Bro, no puedo ayudarte. En plan.");
+                } else if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {     // No quedan coordenadas
+                    msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
+                    msgAgente.setContent(posReno);
 
-                        } else if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {     // No quedan coordenadas
-                            msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
-                            msgAgente.setContent(posReno);
+                } else {      // Quedan coordenadas y codigo de converasion correcto
+                    msgAgente = msgAgente.createReply(ACLMessage.AGREE);
 
-                        } else {      // Quedan coordenadas y codigo de converasion correcto
-                            msgAgente = msgAgente.createReply(ACLMessage.AGREE);
+                    // Obtiene la posicion de un reno perdido
+                    Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
+                    agenteRudolph.getPosRenosPerdidos().removeFirst();
+                    posReno = "[" + pos.getFila() + "," + pos.getColumna() + "]";
 
-                            // Obtiene la posicion de un reno perdido
-                            Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
-                            agenteRudolph.getPosRenosPerdidos().removeFirst();
-                            posReno = "[" + pos.getFila() + "," + pos.getColumna() + "]";
-
-                            // Comunica la posicion del reno a agente
-                            msgAgente.setContent("Bro, acepto. Las coordenadas son: " + posReno + ". En plan.");
-                        }
-
-                        agenteRudolph.send(msgAgente);
-                        agenteRudolph.getGraficos().agregarTraza(msgAgente.toString());
-                    }
+                    // Comunica la posicion del reno a agente
+                    msgAgente.setContent("Bro, acepto. Las coordenadas son: " + posReno + ". En plan.");
                 }
-            }
 
-            default -> {
-                System.out.println("ElfoTraductor: Estado desconocido.");
-                myAgent.doDelete();
+                agenteRudolph.send(msgAgente);
+                agenteRudolph.getGraficos().agregarTraza(msgAgente.toString());
             }
         }
-
     }
 
     @Override

@@ -6,10 +6,7 @@ import Rudolph.comportamientos.ComunicacionRudolph;
 import herramientas.GestorAgentes;
 import herramientas.Posicion;
 import java.util.ArrayList;
-/**
- *
- * @author floren
- */
+
 public class Rudolph extends Agent {
 
     private SimulacionAgenteGUI g;

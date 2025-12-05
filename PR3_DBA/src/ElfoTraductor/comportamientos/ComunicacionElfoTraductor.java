@@ -1,17 +1,14 @@
 package ElfoTraductor.comportamientos;
 
 import ElfoTraductor.ElfoTraductor;
-import herramientas.GestorAgentes;
+import herramientas.GestorComunicaciones;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 
 public class ComunicacionElfoTraductor extends Behaviour {
 
-    private final String CONVERSACION_AGENTE_ELFO_ID = "salvador-elfo-traductor-conversacion";
-
-    private ElfoTraductor agenteElfo;
-    private EstadosElfoTraductor estados;
+    private final ElfoTraductor agenteElfo;
 
     private boolean fin;
 
@@ -21,71 +18,47 @@ public class ComunicacionElfoTraductor extends Behaviour {
     public ComunicacionElfoTraductor(ElfoTraductor agent) {
         super(agent);
         this.agenteElfo = agent;
-        this.estados = EstadosElfoTraductor.ESPERANDO_A_TRADUCIR;
     }
 
     @Override
     public void action() {
-        String mensajeTraducido;
+        String mensajeTraducido = "";
 
-        switch (estados) {
-            
-            case ESPERANDO_A_TRADUCIR:
-                              
-                msgAgente = agente.blockingReceive(); //  Espera el mensaje del agente
+        msgAgente = agenteElfo.blockingReceive(); //  Espera el mensaje del agente
 
-                if (msgBarco != null && msgBarco.getPerformative() == ACLMessage.REQUEST) {
+        if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) { // Mensaje del agente debe ser REQUEST
 
-                    if (msgBarco.getSender().equals(barco)) {
+            if (!msgAgente.getSender().equals(agente)) {
+                System.out.println("No me comunico contigo");
+            } else { // El emisor debe ser el agente
+                // El mensaje puede estar en dos idiomas, genz o fines, y quiero traducirlo al otro
 
-                        // Traduccion del mensaje
-                        mensajeTraducido = GestorComunicacion.traduceBarcoJarl(msgBarco.getContent());
-
-                        // Enviar INFORM al barco vikingo
-                        msgBarco = msgBarco.createReply(ACLMessage.INFORM);
-                        msgBarco.setContent(mensajeTraducido);
-                        agente.send(msgBarco);
-                        agente.getGraficos().agregarTraza(msgBarco.toString());
-                        this.paso = EstadosSkal.ESPERANDO_MENSAJE_JARL;
-                    } else {
-                        System.out.println("No entiendo lo que me quieres decir soy Skal");
+                String idioma = msgAgente.getLanguage();
+                if (null == idioma) {
+                    // devolver con not understood
+                } else // Traduccion del mensaje
+                // Dos opciones
+                {
+                    switch (idioma) {
+                        case "GenzZ" -> // GENZ-FINES
+                            mensajeTraducido = GestorComunicaciones.traduceAgente_SantaClaus(msgAgente.getContent());
+                        case "Fines" -> // FINES-GENZ
+                            mensajeTraducido = GestorComunicaciones.traduceSantaClaus_Agente(msgAgente.getContent());
+                        default -> {
+                        }
                     }
-                } else {
-                    System.out.println("Error esperando REQUEST en: " + agente.getLocalName());
                 }
 
-                break;
+                // Enviar INFORM de vuelta al agente
+                msgAgente = msgAgente.createReply(ACLMessage.INFORM);
+                msgAgente.setContent(mensajeTraducido);
+                agenteElfo.send(msgAgente);
+                agenteElfo.getGraficos().agregarTraza(msgAgente.toString());
 
-            case ESPERANDO_MENSAJE_JARL:
-                msgJarl = agente.blockingReceive();
-
-                if (msgJarl != null && msgJarl.getPerformative() == ACLMessage.REQUEST) {
-
-                    if (msgJarl.getSender().equals(jarl)) {
-                        // Traduccion del mensaje
-                        mensajeTraducido = GestorComunicacion.traduceJarlBarco(msgJarl.getContent());
-
-                        // Enviar INFORM al barco vikingo
-                        msgJarl = msgJarl.createReply(ACLMessage.INFORM);
-                        msgJarl.setContent(mensajeTraducido);
-                        agente.send(msgJarl);
-                        agente.getGraficos().agregarTraza(msgJarl.toString());
-                        this.paso = EstadosSkal.ESPERANDO_MENSAJE_BARCO;
-                    } else {
-                        System.out.println("No entiendo lo que me quieres decir, soy Skal");
-                    }
-                } else {
-                    System.out.println("Error esperando REQUEST en: " + agente.getLocalName());
-                }
-
-                break;
-
-            default:
-                System.out.println("[Skal] Error: Estado desconocido.");
-                myAgent.doDelete();
-                break;
+            }
+        } else {
+            System.out.println("Error esperando REQUEST en: " + agente.getLocalName()); // Not understood
         }
-
     }
 
     @Override
