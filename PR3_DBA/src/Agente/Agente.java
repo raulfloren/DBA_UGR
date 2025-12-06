@@ -1,5 +1,6 @@
 package Agente;
 
+import Agente.comportamientos.ComunicacionAgente;
 import herramientas.Sensores;
 import herramientas.Posicion;
 import GUI.SimulacionAgenteGUI;
@@ -7,6 +8,7 @@ import Agente.comportamientos.DecisionMov;
 import Agente.comportamientos.Percepcion;
 import Agente.comportamientos.HacerMov;
 import Agente.comportamientos.Validacion;
+import herramientas.GestorAgentes;
 import jade.core.Agent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ public class Agente extends Agent {
     private Posicion posAgente, posObjetivo;
 
     //Movimientos
+    private boolean esperandoMisionPermitida = true; // Empieza quieto
+
     private ArrayList<Movimientos> casillasDisponibles;
     private Movimientos movimientoDecidido; // se modifciara en decidirMov()
     private Posicion posAnterior; //Para dibujar rastro
@@ -39,10 +43,12 @@ public class Agente extends Agent {
 
     private Movimientos ultimoMovimiento = null;
 
+    private boolean navidadSalvada = false;
+
     // Constructor
-    public Agente(Posicion posAgente, Posicion posObjetivo, Sensores sensores) {
+    public Agente(Posicion posAgente, Sensores sensores) {
         this.posAgente = posAgente;
-        this.posObjetivo = posObjetivo;
+        this.posObjetivo = null;
         this.sensores = sensores;
         this.casillasDisponibles = new ArrayList<>();
         this.movimientoDecidido = null;
@@ -53,23 +59,24 @@ public class Agente extends Agent {
     }
 
     public Agente() {
-        this(null, null, null);
+        this(null, null);
     }
 
     @Override
     protected void setup() {
-        System.out.println("Soy agente: " + getAID().getLocalName());
+        System.out.println("Soy Agente: " + getAID().getLocalName());
 
         Object[] args = getArguments();
-        if (args != null && args.length == 4) {
+        if (args != null && args.length == 3) {
             posAgente = (Posicion) args[0];
-            posObjetivo = (Posicion) args[1];
-            sensores = (Sensores) args[2];
-            GUI = (SimulacionAgenteGUI) args[3];
+            sensores = (Sensores) args[1];
+            GUI = (SimulacionAgenteGUI) args[2];
         } else {
-            System.err.println("❌ Error: El agente necesita (posAgente, posObjetivo, Senores, GUI) como argumentos.");
+            System.err.println("❌ Error: El agente necesita (posAgente, Senores, GUI) como argumentos.");
             doDelete();
         }
+
+        GestorAgentes.registrarAgente(this, "PLAYER", "salvador");
 
         // percepción → decisión → acción → validación, 
         addBehaviour(new Percepcion(this));
@@ -102,6 +109,9 @@ public class Agente extends Agent {
     }
 
     public boolean objetivoEncontrado() {
+        if (posObjetivo == null) {
+            return false;
+        }
         return posAgente.equals(posObjetivo);
     }
 
@@ -310,4 +320,31 @@ public class Agente extends Agent {
             GUI.dispose();
         }
     }
+
+    public void setNuevoObjetivo(Posicion nuevoDestino) {
+        this.posObjetivo = nuevoDestino;
+        cleanMemoria();
+        System.out.println("📍Nuevo objetivo recibido: " + nuevoDestino);
+    }
+
+    public void notificarRenoEncontrado() {
+        System.out.println("✅ He encontrado el reno: " + posObjetivo);
+
+        // 1. Reseteamos el objetivo para que el agente se pare
+        this.posObjetivo = null;
+        cleanMemoria();
+    }
+
+    public Posicion getPosObjetivo() {
+        return posObjetivo;
+    }
+
+    public boolean navidadSalvada() {
+        return navidadSalvada;
+    }
+
+    public void cleanMemoria() {
+        memoriaVisitadas.clear();
+    }
+
 }

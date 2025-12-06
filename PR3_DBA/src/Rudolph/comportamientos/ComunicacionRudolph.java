@@ -1,6 +1,7 @@
 package Rudolph.comportamientos;
 
 import Rudolph.Rudolph;
+import static Rudolph.comportamientos.EstadosRudolph.*;
 import herramientas.GestorAgentes;
 import herramientas.GestorComunicaciones;
 import herramientas.Posicion;
@@ -10,9 +11,11 @@ import jade.lang.acl.ACLMessage;
 
 public class ComunicacionRudolph extends Behaviour {
 
+    private final String CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD = "Profee, apruebanos.";
     private final String CONVERSACION_AGENTE_RUDOLPH_ID = "salvador-rudolph-conversacion";
 
     private final Rudolph agenteRudolph;
+    private EstadosRudolph estados;
 
     private boolean fin;
 
@@ -22,22 +25,27 @@ public class ComunicacionRudolph extends Behaviour {
     public ComunicacionRudolph(Rudolph agent) {
         super(agent);
         this.agenteRudolph = agent;
-        this.doHandshake();
+        this.estados = ESPERANDO_AL_SALVADOR;
+        this.conocerAgentes();
     }
 
-    private void doHandshake() {
-        boolean conexionEstablecidaAgente = false;
+    private void conocerAgentes() {
+
+        System.out.println("Soy Rudolph buscando agentes: ");
+
+        boolean todosLosAgentesRegistrados = false;
         AID[] agentes = null;
 
-        while (!conexionEstablecidaAgente) {
+        while (!todosLosAgentesRegistrados) {
 
-            // Buscar los agentes de tipo PLAYER (solo hay uno)
+            // Buscar los agentes del DF
             agentes = GestorAgentes.buscarAgentes(this.agenteRudolph, "PLAYER");
+
             if (agentes.length == 1) { // Número esperado de servicios
-                conexionEstablecidaAgente = true;
+                todosLosAgentesRegistrados = true;
             } else {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(100); // Esperar 1 segundo antes de volver a buscar
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -45,44 +53,67 @@ public class ComunicacionRudolph extends Behaviour {
 
         }
 
-        this.agente = GestorAgentes.buscarAgenteEnLista(agentes, "salvador");
+        System.out.println("Rudolph, encuentra: " + GestorAgentes.buscarAgenteEnLista(agentes, "salvador"));
 
+        this.agente = GestorAgentes.buscarAgenteEnLista(agentes, "salvador");
     }
 
     @Override
     public void action() {
 
-        msgAgente = agenteRudolph.blockingReceive();
-        String posReno = "Bro, no quedan renos perdidos. En plan.";
+        String mensaje = "";
 
-        if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) {
+        switch (estados) {
+            case ESPERANDO_AL_SALVADOR -> {
+                System.out.println("Esperando rudolph");
 
-            if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeAgente(msgAgente.getContent())) {
+                msgAgente = agenteRudolph.blockingReceive();
 
-                if (!msgAgente.getConversationId().equals(CONVERSACION_AGENTE_RUDOLPH_ID)) {      // Si no es el codigo correcto
-                    msgAgente = msgAgente.createReply(ACLMessage.NOT_UNDERSTOOD);
-                    msgAgente.setContent("Bro, no puedo ayudarte. En plan.");
+                System.out.println("Recibido rudolph");
+                System.out.println(msgAgente);
 
-                } else if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {     // No quedan coordenadas
-                    msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
-                    msgAgente.setContent(posReno);
+                String posReno = "Bro, no quedan renos perdidos. En plan.";
 
-                } else {      // Quedan coordenadas y codigo de converasion correcto
-                    msgAgente = msgAgente.createReply(ACLMessage.AGREE);
+                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.QUERY_REF) {
 
-                    // Obtiene la posicion de un reno perdido
-                    Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
-                    agenteRudolph.getPosRenosPerdidos().removeFirst();
-                    posReno = "[" + pos.getFila() + "," + pos.getColumna() + "]";
+                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeAgente(msgAgente.getContent())) {
 
-                    // Comunica la posicion del reno a agente
-                    msgAgente.setContent("Bro, acepto. Las coordenadas son: " + posReno + ". En plan.");
+                        if (!msgAgente.getConversationId().equals(CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD)) {      // Si no es el codigo correcto
+                            msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
+                            msgAgente.setContent("Bro, que me esta contando. En plan.");
+
+                        } else {
+                            msgAgente = msgAgente.createReply(ACLMessage.INFORM);
+
+                            if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {     // No quedan coordenadas
+                                msgAgente.setContent(posReno);
+
+                            } else {      // Quedan coordenadas y codigo de converasion correcto
+                                // Obtiene la posicion de un reno perdido
+                                Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
+                                agenteRudolph.getPosRenosPerdidos().removeFirst();
+                                posReno = "[" + pos.getFila() + "," + pos.getColumna() + "]";
+
+                                // Comunica la posicion del reno a agente
+                                msgAgente.setContent("Bro, acepto. Las coordenadas son: " + posReno + ". En plan.");
+                            }
+
+                            agenteRudolph.send(msgAgente);
+
+                            agenteRudolph.getGraficos().agregarTraza(msgAgente.toString());
+
+                        }
+                    }
                 }
 
-                agenteRudolph.send(msgAgente);
-                agenteRudolph.getGraficos().agregarTraza(msgAgente.toString());
             }
+
+            default -> {
+
+            }
+
         }
+
     }
 
     @Override

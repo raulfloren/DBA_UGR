@@ -10,7 +10,7 @@ public class GestorComunicaciones {
     }
 
     public static Boolean isCorrectMensajeSantaClaus(String msg) {
-        return (msg.startsWith("Joulupukki") && msg.endsWith("Kiitos.")) || (msg.startsWith("Hyvää joulua") && msg.endsWith("Nähdään pian."));
+        return (msg.startsWith("Rakas Joulupukki") && msg.endsWith("Kiitos.")) || (msg.startsWith("Hyvää joulua") && msg.endsWith("Nähdään pian."));
     }
 
     // Generación del string si es digno o no
@@ -30,7 +30,7 @@ public class GestorComunicaciones {
         String finalMsg = msg;
 
         if (finalMsg.startsWith("Bro")) {
-            finalMsg = finalMsg.replaceFirst("Bro", "Joulupukki");
+            finalMsg = finalMsg.replaceFirst("Bro", "Rakas Joulupukki");
         }
 
         if (finalMsg.endsWith("En plan.")) {
@@ -54,10 +54,18 @@ public class GestorComunicaciones {
         return finalMsg;
     }
 
-    public static String obtenerTotem(String msg) {
+    public static String obtenerCodigoSecreto(String msg) {
         Pattern pattern = Pattern.compile("\\[(.*?)\\]");
         Matcher matcher = pattern.matcher(msg);
         matcher.find();
         return matcher.group(1);
     }
+
+    public static String obtenerCoordenadasMensaje(String msg) {
+        Pattern pattern = Pattern.compile("\\[(.*?)\\]");
+        Matcher matcher = pattern.matcher(msg);
+        matcher.find();
+        return matcher.group(1);
+    }
+
 }

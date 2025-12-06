@@ -13,12 +13,15 @@ public class DecisionMov extends Behaviour {
 
     @Override
     public void action() {
-        agente.decidirMov();
+
+        if (agente.getPosObjetivo() != null) {
+            agente.decidirMov();
+        }
     }
 
     @Override
     public boolean done() {
-        return agente.objetivoEncontrado();
+        return agente.navidadSalvada();
     }
 
 }
@@ -29,4 +32,4 @@ De la lista de las casillas posibles que hemos obtenido con el comportamiento pe
 
 Decidimos cual de esas casillas es la que mejor nos viene y añadimos su movimiento al movimientoDecidido
 
-*/
+ */

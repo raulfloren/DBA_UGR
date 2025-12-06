@@ -13,13 +13,16 @@ public class HacerMov extends Behaviour {
 
     @Override
     public void action() {
-        agente.hacerMov();
-        agente.updateMemoriaVisitadas();
+        if (agente.getPosObjetivo() != null) {
+
+            agente.hacerMov();
+            agente.updateMemoriaVisitadas();
+        }
     }
 
     @Override
     public boolean done() {
-        return agente.objetivoEncontrado();
+        return agente.navidadSalvada();
     }
 }
 

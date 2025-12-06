@@ -13,8 +13,9 @@ public class Rudolph extends Agent {
     private ArrayList<Posicion> posRenosPerdidos;
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void setup() {
-        System.out.println("Agente Rudolph iniciado: " + getLocalName());
+        System.out.println("Soy Rudolph iniciado: " + getAID().getLocalName());
 
         Object[] args = getArguments();
         if (args != null && args.length == 2) {
@@ -26,7 +27,7 @@ public class Rudolph extends Agent {
             return;
         }
 
-        GestorAgentes.registrarAgente(this, "NPC", "Rudolph");
+        GestorAgentes.registrarAgente(this, "NPC", "rudolph");
 
         addBehaviour(new ComunicacionRudolph(this));
     }

@@ -13,13 +13,16 @@ public class Percepcion extends Behaviour {
 
     @Override
     public void action() {
-        agente.verCasillasDisponibles();
-        // agente.updateMemoriaVistas();
+        if (agente.getPosObjetivo() != null) {
+
+            agente.verCasillasDisponibles();
+            // agente.updateMemoriaVistas();
+        }
     }
 
     @Override
     public boolean done() {
-        return agente.objetivoEncontrado();
+        return agente.navidadSalvada();
     }
 }
 

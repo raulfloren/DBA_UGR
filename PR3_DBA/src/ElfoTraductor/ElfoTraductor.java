@@ -11,10 +11,10 @@ public class ElfoTraductor extends Agent {
 
     @Override
     protected void setup() {
-        System.out.println("Agente ElfoTraductor iniciado: " + getLocalName());
+        System.out.println("Soy ElfoTraductor: " + getAID().getLocalName());
 
         Object[] args = getArguments();
-        if (args != null && args.length == 2) {
+        if (args != null && args.length == 1) {
             this.g = (SimulacionAgenteGUI) args[0];
         } else {
             System.out.println("Error: ElfoTraductor Parámetros.");
@@ -22,7 +22,7 @@ public class ElfoTraductor extends Agent {
             return;
         }
 
-        GestorAgentes.registrarAgente(this, "NPC", "ElfoTraductor");
+        GestorAgentes.registrarAgente(this, "NPC", "elfoTraductor");
 
         addBehaviour(new ComunicacionElfoTraductor(this));
     }
