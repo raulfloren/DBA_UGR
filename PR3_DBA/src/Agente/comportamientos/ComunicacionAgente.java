@@ -172,7 +172,7 @@ public class ComunicacionAgente extends Behaviour {
 
                         agenteSalvador.send(msgRudolph);
                         agenteSalvador.getGUI().agregarTraza("Agente envía QUERY_REF a Rudolph");
-                        estados = ESPERANDO_COORDENADAS_RENO_PERDIDO;
+                        estados = BUSCANDO_RENOS_PERDIDOS;
 
                     } else {
                         System.out.println("No entiendo lo que me quieres decir");
@@ -183,7 +183,7 @@ public class ComunicacionAgente extends Behaviour {
 
             }
 
-            case ESPERANDO_COORDENADAS_RENO_PERDIDO -> {
+/*            case ESPERANDO_COORDENADAS_RENO_PERDIDO -> {
                 System.out.println("Esperando coordenada reno");
 
                 msgRudolph = agenteSalvador.blockingReceive();
@@ -208,6 +208,7 @@ public class ComunicacionAgente extends Behaviour {
                     }
                 }
 
+            }
             }
 
             case MOVIENDOSE -> {
@@ -244,7 +245,46 @@ public class ComunicacionAgente extends Behaviour {
                 // Volvemos a esperar la respuesta
                 estados = ESPERANDO_COORDENADAS_RENO_PERDIDO;
             }
-
+*/
+            case BUSCANDO_RENOS_PERDIDOS -> {
+                // Si el agente ha encontrado el objetivo, o no tiene un objetivo claro aun (primer reno que busca), pregunta al reno
+                if (agenteSalvador.objetivoEncontrado() || !agenteSalvador.hayObjetivo())
+                {
+                    
+                    // Preguntamos a Rudolph por el siguiente reno
+                    agenteSalvador.send(msgRudolph);
+                    agenteSalvador.getGUI().agregarTraza("Agente envía QUERY_REF a Rudolph");
+                    System.out.println("Esperando respuesta del reno");
+                    msgRudolph = agenteSalvador.blockingReceive();
+                    System.out.println("Recibida respuesta del reno");
+                    System.out.println(msgRudolph);
+                    
+                    // Procesado de la respuesta del reno
+                    if (msgRudolph != null && msgRudolph.getPerformative() == ACLMessage.INFORM) // Mensaje correcto, es un inform
+                    {
+                        if (msgRudolph.getSender().equals(rudolph) && GestorComunicaciones.isCorrectMensajeAgente(msgRudolph.getContent())) 
+                        {
+                            // PROCESADO DE COORDENADAS
+                            mensaje = GestorComunicaciones.obtenerCoordenadasMensaje(msgRudolph.getContent());
+                            if (!mensaje.equals("Bro, no quedan renos perdidos. En plan.")) // Si quedan renos aun, decodificamos la coordenada
+                            {
+                                String[] posicion = mensaje.split(",");
+                                int fila = Integer.parseInt(posicion[0]);
+                                int columna = Integer.parseInt(posicion[1]); 
+                                this.agenteSalvador.setNuevoObjetivo(new Posicion(fila, columna));
+                            }
+                            else // No quedan mas renos, dejamos de buscar, y continuamos con el siguiente estado
+                            {
+                                this.agenteSalvador.setNuevoObjetivo(null);
+                                // estados = ; // Establecemos el siguiente estado
+                                System.out.println("HE ENCONTRADO TODOS LOS RENOS");
+                                estados = null;
+                            }
+                        }
+                    }                    
+                }
+            }
+            
             default -> {
             }
         }

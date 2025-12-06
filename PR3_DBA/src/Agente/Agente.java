@@ -114,6 +114,10 @@ public class Agente extends Agent {
         }
         return posAgente.equals(posObjetivo);
     }
+    
+    public boolean hayObjetivo() {
+        return posObjetivo != null;
+    }    
 
     // Casillas adyacentes disponibles
     public void verCasillasDisponibles() {
@@ -324,11 +328,11 @@ public class Agente extends Agent {
     public void setNuevoObjetivo(Posicion nuevoDestino) {
         this.posObjetivo = nuevoDestino;
         cleanMemoria();
-        System.out.println("📍Nuevo objetivo recibido: " + nuevoDestino);
+        System.out.println("📍Nuevo objetivo recibido: [" + posObjetivo.getColumna() + ", " + posObjetivo.getFila() + "]");
     }
 
     public void notificarRenoEncontrado() {
-        System.out.println("✅ He encontrado el reno: " + posObjetivo);
+        System.out.println("✅ He encontrado el reno: [" + posObjetivo.getColumna() + ", " + posObjetivo.getFila() + "]");
 
         // 1. Reseteamos el objetivo para que el agente se pare
         this.posObjetivo = null;

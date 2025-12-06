@@ -91,6 +91,7 @@ public class ComunicacionRudolph extends Behaviour {
                             } else {      // Quedan coordenadas y codigo de converasion correcto
                                 // Obtiene la posicion de un reno perdido
                                 Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
+                                System.out.println("QUEDAN " + agenteRudolph.getPosRenosPerdidos().size()+ " =======================================================================================================================================");
                                 agenteRudolph.getPosRenosPerdidos().removeFirst();
                                 posReno = "[" + pos.getFila() + "," + pos.getColumna() + "]";
 
