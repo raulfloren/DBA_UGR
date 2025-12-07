@@ -97,7 +97,7 @@ public class PR3_DBA {
             System.out.println("🤖 Elfo Tradcutor iniciado correctamente.");
 
             // ====================================================================================
-            // --- Crear Elfo Traductor ---
+            // --- Crear Santa ---
             Object[] argsSanta = new Object[]{GUI, posSanta};
 
             String claseSanta = SantaClaus.class.getName();
@@ -111,8 +111,8 @@ public class PR3_DBA {
 
             renosPerdidos.add(new Posicion(1, 1));
             renosPerdidos.add(new Posicion(1, 8));
-            renosPerdidos.add(new Posicion(8, 1));
-            renosPerdidos.add(new Posicion(8, 8));
+            //renosPerdidos.add(new Posicion(8, 1));
+            //renosPerdidos.add(new Posicion(8, 8));
 
             Object[] argsRudolph = new Object[]{GUI, renosPerdidos};
 

@@ -22,11 +22,9 @@ public class Agente extends Agent {
 
     // Sensores y posiciones Agente y objetivo;
     private Sensores sensores;
-    private Posicion posAgente, posObjetivo;
+    private Posicion posAgente, posObjetivo, posObjetivoAnteior;
 
     //Movimientos
-    private boolean esperandoMisionPermitida = true; // Empieza quieto
-
     private ArrayList<Movimientos> casillasDisponibles;
     private Movimientos movimientoDecidido; // se modifciara en decidirMov()
     private Posicion posAnterior; //Para dibujar rastro
@@ -49,6 +47,7 @@ public class Agente extends Agent {
     public Agente(Posicion posAgente, Sensores sensores) {
         this.posAgente = posAgente;
         this.posObjetivo = null;
+        this.posObjetivoAnteior = null;
         this.sensores = sensores;
         this.casillasDisponibles = new ArrayList<>();
         this.movimientoDecidido = null;
@@ -113,6 +112,10 @@ public class Agente extends Agent {
             return false;
         }
         return posAgente.equals(posObjetivo);
+    }
+
+    public boolean hayObjetivo() {
+        return posObjetivo != null;
     }
 
     // Casillas adyacentes disponibles
@@ -185,8 +188,9 @@ public class Agente extends Agent {
             double H_proximaPos = getHeuristica(proximaPos);
 
             // Comprobación para no volver atrás
+            double penalizacionVolver = 0;
             if (posPrev != null && proximaPos.equals(posPrev)) {
-                continue;
+                penalizacionVolver = 2.0; // Un coste extra por retroceder, pero PERMITIDO
             }
 
             // --- 1. Coste inicial ---
@@ -222,7 +226,7 @@ public class Agente extends Agent {
                 preferenciaMomentum = -0.1; // Ajusta este valor si es necesario
             }
 
-            double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion + preferenciaMomentum;
+            double costeF_Decision = K_costePaso_conPenalizacion + H_proximaPos + preferenciaDireccion + preferenciaMomentum + penalizacionVolver;
 
             // --- 4. Lógica de Decisión con Desempate ---
             if (costeF_Decision < minCosteDecision) {
@@ -323,20 +327,29 @@ public class Agente extends Agent {
 
     public void setNuevoObjetivo(Posicion nuevoDestino) {
         this.posObjetivo = nuevoDestino;
-        cleanMemoria();
-        System.out.println("📍Nuevo objetivo recibido: " + nuevoDestino);
+        System.out.println("📍Nuevo objetivo recibido en: [" + posObjetivo.getFila() + ", " + posObjetivo.getColumna() + "]");
     }
 
     public void notificarRenoEncontrado() {
-        System.out.println("✅ He encontrado el reno: " + posObjetivo);
+        System.out.println("✅ He encontrado el objetido de: [" + posObjetivo.getFila() + ", " + posObjetivo.getColumna() + "]");
 
+        this.posObjetivoAnteior = posObjetivo;
         // 1. Reseteamos el objetivo para que el agente se pare
         this.posObjetivo = null;
+
         cleanMemoria();
     }
 
     public Posicion getPosObjetivo() {
         return posObjetivo;
+    }
+
+    public Posicion getPosObjetivoAnterior() {
+        return posObjetivoAnteior;
+    }
+
+    public void haSalvadoElCuatri() {
+        navidadSalvada = true;
     }
 
     public boolean navidadSalvada() {
@@ -345,6 +358,9 @@ public class Agente extends Agent {
 
     public void cleanMemoria() {
         memoriaVisitadas.clear();
+        memoriaHeuristica.clear();
+        this.posAnterior = null;
+        this.ultimoMovimiento = null;
     }
 
 }
