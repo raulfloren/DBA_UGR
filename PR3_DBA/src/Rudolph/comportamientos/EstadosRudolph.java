@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Rudolph.comportamientos;
 
 /**
@@ -9,5 +5,7 @@ package Rudolph.comportamientos;
  * @author jesusp
  */
 public enum EstadosRudolph {
-    ESPERANDO_AL_SALVADOR
+    ESPERANDO_AL_SALVADOR,
+    HA_SALVADO_LA_NAVIDAD,
+    FIN_AGENTE
 }

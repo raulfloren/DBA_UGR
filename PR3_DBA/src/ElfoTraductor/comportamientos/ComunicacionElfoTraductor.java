@@ -56,41 +56,30 @@ public class ComunicacionElfoTraductor extends Behaviour {
     public void action() {
         String mensajeTraducido = "";
 
-        System.out.println("Esperando elfo");
-
         msgAgente = agenteElfo.blockingReceive(); //  Espera el mensaje del agente
-
-        System.out.println("Recibido elfo");
-        System.out.println(msgAgente);
 
         if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) { // Mensaje del agente debe ser REQUEST
 
-            if (!msgAgente.getSender().equals(agente)) {
+            if (!msgAgente.getSender().equals(agente)) { // Solo me puede enviar el agente
                 System.out.println("No me comunico contigo");
-            } else { // El emisor debe ser el agente
+            } else {
                 // El mensaje puede estar en dos idiomas, genz o fines, y quiero traducirlo al otro
 
                 String idioma = msgAgente.getLanguage();
 
-                if (null == idioma) {
-                    // devolver con not understood
-                } else // Traduccion del mensaje
-                // Dos opciones
-                {
-                    switch (idioma.toUpperCase().trim()) {
-                        case "GENZ" -> // GENZ-FINES
-                        {
-                            System.out.println("Traduciendo a Fines");
-                            mensajeTraducido = GestorComunicaciones.traduceAgente_SantaClaus(msgAgente.getContent());
+                switch (idioma.toUpperCase().trim()) {
+                    case "GENZ" -> // GENZ-FINES
+                    {
+                        agenteElfo.getGraficos().agregarTraza("Traduciendo a Fines");
+                        mensajeTraducido = GestorComunicaciones.traduceAgente_SantaClaus(msgAgente.getContent());
 
-                        }
-                        case "FINES" -> // FINES-GENZ
-                        {
-                            System.out.println("Traduciendo a GenZ");
-                            mensajeTraducido = GestorComunicaciones.traduceSantaClaus_Agente(msgAgente.getContent());
-                        }
-                        default -> {
-                        }
+                    }
+                    case "FINES" -> // FINES-GENZ
+                    {
+                        agenteElfo.getGraficos().agregarTraza("Traduciendo a GenZ");
+                        mensajeTraducido = GestorComunicaciones.traduceSantaClaus_Agente(msgAgente.getContent());
+                    }
+                    default -> {
                     }
                 }
 
@@ -103,7 +92,7 @@ public class ComunicacionElfoTraductor extends Behaviour {
 
             }
         } else {
-            System.out.println("Error esperando REQUEST en: " + agente.getLocalName()); // Not understood
+            System.out.println("Error esperando REQUEST en: " + agenteElfo.getLocalName()); // Not understood
         }
     }
 

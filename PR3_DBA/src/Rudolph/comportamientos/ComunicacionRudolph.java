@@ -61,52 +61,67 @@ public class ComunicacionRudolph extends Behaviour {
     @Override
     public void action() {
 
-        String mensaje = "";
+        String mensaje = "Bro, no quedan renos perdidos. En plan.";
 
         switch (estados) {
+            // Esperando a que el agente pida coordenadas
             case ESPERANDO_AL_SALVADOR -> {
-                System.out.println("Esperando rudolph");
 
                 msgAgente = agenteRudolph.blockingReceive();
-
-                System.out.println("Recibido rudolph");
-                System.out.println(msgAgente);
-
-                String posReno = "Bro, no quedan renos perdidos. En plan.";
 
                 if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.QUERY_REF) {
 
                     if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeAgente(msgAgente.getContent())) {
 
                         if (!msgAgente.getConversationId().equals(CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD)) {      // Si no es el codigo correcto
-                            msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
+                            msgAgente = msgAgente.createReply(ACLMessage.NOT_UNDERSTOOD);
                             msgAgente.setContent("Bro, que me esta contando. En plan.");
+                            agenteRudolph.getGraficos().agregarTraza("Rudolph envia NOT_UNDERSTOOD a Agente");
 
-                        } else {
+                        } else { // Si el codigo es correcto
+
+                            // Quedan coordenadas y codigo de converasion correcto
+                            // Obtiene la posicion de un reno perdido
                             msgAgente = msgAgente.createReply(ACLMessage.INFORM);
 
-                            if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {     // No quedan coordenadas
-                                msgAgente.setContent(posReno);
+                            Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
+                            agenteRudolph.getPosRenosPerdidos().removeFirst();
 
-                            } else {      // Quedan coordenadas y codigo de converasion correcto
-                                // Obtiene la posicion de un reno perdido
-                                Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
-                                System.out.println("QUEDAN " + agenteRudolph.getPosRenosPerdidos().size()+ " =======================================================================================================================================");
-                                agenteRudolph.getPosRenosPerdidos().removeFirst();
-                                posReno = "[" + pos.getFila() + "," + pos.getColumna() + "]";
+                            mensaje = "[" + pos.getFila() + "," + pos.getColumna() + "]";
 
-                                // Comunica la posicion del reno a agente
-                                msgAgente.setContent("Bro, acepto. Las coordenadas son: " + posReno + ". En plan.");
-                            }
-
-                            agenteRudolph.send(msgAgente);
-
-                            agenteRudolph.getGraficos().agregarTraza(msgAgente.toString());
+                            // Comunica la posicion del reno a agente
+                            msgAgente.setContent("Bro, acepto. Las coordenadas son: " + mensaje + ". En plan.");
+                            agenteRudolph.getGraficos().agregarTraza("Rudolph envia INFORM a Agente");
 
                         }
+
+                        agenteRudolph.send(msgAgente);
+
+                        if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {     // No quedan coordenadas
+                            this.estados = EstadosRudolph.HA_SALVADO_LA_NAVIDAD;
+                        }
+
                     }
                 }
 
+            }
+
+            // El agente ha econtrado todos los renos
+            case HA_SALVADO_LA_NAVIDAD -> {
+
+                msgAgente = agenteRudolph.blockingReceive();
+
+                msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
+                msgAgente.setContent(mensaje);
+                agenteRudolph.send(msgAgente);
+                agenteRudolph.getGraficos().agregarTraza("Rudolph envia REFUSE a Agente");
+                this.estados = EstadosRudolph.FIN_AGENTE;
+
+            }
+
+            // Fin agente
+            case FIN_AGENTE -> {
+                agenteRudolph.doDelete();
             }
 
             default -> {

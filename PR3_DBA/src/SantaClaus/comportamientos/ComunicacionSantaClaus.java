@@ -4,11 +4,14 @@ import SantaClaus.SantaClaus;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
-import static SantaClaus.comportamientos.EstadosSantaClaus.*;
 import herramientas.GestorAgentes;
 import herramientas.GestorComunicaciones;
+import entorno.Entorno;
+import herramientas.Posicion;
 
 public class ComunicacionSantaClaus extends Behaviour {
+
+    private Posicion posSanta;
 
     private final String CONVERSACION_AGENTE_SANTA_ID = "salvador-santa-conversacion";
     private final String CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD = "Profee, apruebanos.";
@@ -23,10 +26,11 @@ public class ComunicacionSantaClaus extends Behaviour {
     private AID agente, santaClaus;
     private ACLMessage msgAgente;
 
-    public ComunicacionSantaClaus(SantaClaus agent) {
+    public ComunicacionSantaClaus(SantaClaus agent, Posicion posSanta) {
         super(agent);
         this.agenteSanta = agent;
-        this.estados = ESPERANDO_VALIENTE;
+        this.posSanta = posSanta;
+        this.estados = EstadosSantaClaus.ESPERANDO_VALIENTE;
         this.conocerAgentes();
     }
 
@@ -61,32 +65,29 @@ public class ComunicacionSantaClaus extends Behaviour {
 
     @Override
     public void action() {
-        String mensajeConfirm = "";
+        String mensaje;
 
         switch (estados) {
+            // Alguien debe salvar la navidad
             case ESPERANDO_VALIENTE -> {
-                System.out.println("Esperando un valiente");
 
                 msgAgente = agenteSanta.blockingReceive();
-
-                System.out.println("Valiente encontrado");
-                System.out.println(msgAgente);
 
                 if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.PROPOSE) {
                     if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
 
                         esValiente = esValiente();
-                        mensajeConfirm = GestorComunicaciones.SantaClausConfirmaDigno(esValiente, CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD);
+                        mensaje = GestorComunicaciones.SantaClausConfirmaDigno(esValiente, CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD);
 
                         // Enviar PROPOSAL ACCEPT o REJECT al agente
                         msgAgente = new ACLMessage(esValiente ? ACLMessage.ACCEPT_PROPOSAL : ACLMessage.REJECT_PROPOSAL);
 
                         msgAgente.addReceiver(agente);
-                        msgAgente.setContent(mensajeConfirm);
+                        msgAgente.setContent(mensaje);
 
                         agenteSanta.send(msgAgente);
-                        agenteSanta.getGraficos().agregarTraza("Santa Claus envía ACCEPT_PROPOSAL/REJECT_PROPOSAL a Agente");
-                        estados = ESPERANDO_SOLICITUD_COORDENADAS;
+                        agenteSanta.getGraficos().agregarTraza("Santa Claus envía " + (esValiente ? "ACCEPT_PROPOSAL" : "REJECT_PROPOSAL") + " a Agente");
+                        this.estados = EstadosSantaClaus.ESPERANDO_SOLICITUD_COORDENADAS;
 
                     } else {
 
@@ -96,14 +97,53 @@ public class ComunicacionSantaClaus extends Behaviour {
                     System.out.println("No ha llegado nada");
                 }
             }
+
+            // El agente ha encontrado todos los renos
             case ESPERANDO_SOLICITUD_COORDENADAS -> {
+
                 msgAgente = agenteSanta.blockingReceive();
 
-                // enviar nuestra coordenada
+                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) {
+                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
+                        // enviar nuestra coordenada
+
+                        msgAgente = msgAgente.createReply(ACLMessage.INFORM);
+                        mensaje = "Hyvää joulua, [" + posSanta.getFila() + "," + posSanta.getColumna() + "]. Nähdään pian.";
+                        msgAgente.setContent(mensaje);
+
+                        agenteSanta.send(msgAgente);
+                        agenteSanta.getGraficos().agregarTraza("Santa Claus envía INFORM a Agente");
+                        this.estados = EstadosSantaClaus.ESPERANDO_SALVADOR_NAVIDAD;
+
+                    }
+                }
+
             }
 
+            // Decir HoHoHo
             case ESPERANDO_SALVADOR_NAVIDAD -> {
-                // Decir hohoho
+
+                msgAgente = agenteSanta.blockingReceive();
+
+                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) {
+                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
+
+                        msgAgente = new ACLMessage(ACLMessage.INFORM);
+                        mensaje = "Hyvää joulua, HoHoHo. Nähdään pian.";
+                        msgAgente.addReceiver(agente);
+                        msgAgente.setContent(mensaje);
+
+                        agenteSanta.send(msgAgente);
+                        agenteSanta.getGraficos().agregarTraza("Santa Claus envía INFORM a Agente");
+                        this.estados = EstadosSantaClaus.FIN_AGENTE;
+
+                    }
+                }
+
+            }
+
+            case FIN_AGENTE -> {
+                agenteSanta.doDelete();
             }
 
             default -> {

@@ -29,7 +29,7 @@ public class SantaClaus extends Agent {
 
         GestorAgentes.registrarAgente(this, "NPC", "santaClaus");
 
-        addBehaviour(new ComunicacionSantaClaus(this));
+        addBehaviour(new ComunicacionSantaClaus(this, posSantaClaus));
     }
 
     public SimulacionAgenteGUI getGraficos() {

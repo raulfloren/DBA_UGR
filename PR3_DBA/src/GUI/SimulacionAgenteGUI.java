@@ -14,7 +14,7 @@ public class SimulacionAgenteGUI extends JFrame {
     private JTextArea textAreaTraza;
     private JPanel panelMatriz;
 
-    private final static int MURO = -1, SUELO = 0, SUELO2 = 1, CAMINO = -4, AGENTE = -2, OBJETIVO = -3;
+    private final static int MURO = -1, SUELO = 0, SUELO2 = 1, CAMINO = -4, AGENTE = -2, SANTA = -3, RENO = -5;
 
     private Movimientos direccionAgente;
     private Map<Movimientos, Image> imagenesAgente;
@@ -44,7 +44,8 @@ public class SimulacionAgenteGUI extends JFrame {
             imagenes.put(SUELO2, ImageIO.read(getClass().getResource("/assets/SUELO2.png")));
             imagenes.put(MURO, ImageIO.read(getClass().getResource("/assets/MURO.png")));
             imagenes.put(CAMINO, ImageIO.read(getClass().getResource("/assets/CAMINO.png")));
-            imagenes.put(OBJETIVO, ImageIO.read(getClass().getResource("/assets/OBJETIVO.png")));
+            imagenes.put(SANTA, ImageIO.read(getClass().getResource("/assets/OBJETIVO.png")));
+            imagenes.put(RENO, ImageIO.read(getClass().getResource("/assets/RENO.png")));
 
             imagenesAgente.put(Movimientos.DOWN, ImageIO.read(getClass().getResource("/assets/heroDOWN.png")));
             imagenesAgente.put(Movimientos.UP, ImageIO.read(getClass().getResource("/assets/heroUP.png")));
@@ -148,10 +149,12 @@ public class SimulacionAgenteGUI extends JFrame {
                     switch (valor) {
                         case MURO ->
                             g.setColor(Color.DARK_GRAY);
-                        case OBJETIVO ->
+                        case SANTA ->
                             g.setColor(Color.GREEN);
                         case CAMINO ->
                             g.setColor(Color.LIGHT_GRAY);
+                        case RENO ->
+                            g.setColor(Color.BLUE);
                         default ->
                             g.setColor(Color.WHITE);
                     }

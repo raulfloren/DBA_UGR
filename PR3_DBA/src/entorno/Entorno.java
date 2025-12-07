@@ -6,18 +6,19 @@ import static movimientos.Movimientos.*;
 
 public class Entorno {
 
-    private final static int AGENTE_ID = -2, OBJETIVO_ID = -3, SUELO_ID = 0, CAMINO_ID = -4;
+    private final static int AGENTE_ID = -2, SANTA_ID = -3, SUELO_ID = 0, CAMINO_ID = -4, RENO_ID = -5;
     private Mapa mapa;
     private Posicion posAgente; // <-- Posición REAL del agente
-    private final Posicion posObjetivo;
+    private Posicion posSanta;
 
     // Constructor entorno
-    public Entorno(Mapa mapa, Posicion agente, Posicion objetivo) {
+    public Entorno(Mapa mapa, Posicion agente, Posicion santa) {
         this.mapa = mapa;
         this.posAgente = agente;
-        this.posObjetivo = objetivo;
+        this.posSanta = santa;
         mapa.ponerItemEnMapa(posAgente, AGENTE_ID);
-        mapa.ponerItemEnMapa(posObjetivo, OBJETIVO_ID);
+        mapa.ponerItemEnMapa(posSanta, SANTA_ID);
+
     }
 
     public Mapa getMapa() {
@@ -28,8 +29,8 @@ public class Entorno {
         return this.posAgente;
     }
 
-    public Posicion getPosicionObjetivo() {
-        return this.posObjetivo;
+    public Posicion getPosicionSanta() {
+        return this.posSanta;
     }
 
     public void setPosAgente(Posicion posAgente, Posicion posAnterior) {
