@@ -111,8 +111,9 @@ public class PR3_DBA {
 
             renosPerdidos.add(new Posicion(1, 1));
             renosPerdidos.add(new Posicion(1, 8));
-            renosPerdidos.add(new Posicion(8, 1));
-            renosPerdidos.add(new Posicion(8, 8));
+            renosPerdidos.add(new Posicion(1, 2));
+            //renosPerdidos.add(new Posicion(8, 8));
+            //renosPerdidos.add(new Posicion(2, 8));
 
             Object[] argsRudolph = new Object[]{GUI, renosPerdidos};
 

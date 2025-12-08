@@ -17,7 +17,7 @@ public class Entorno {
         this.posAgente = agente;
         this.posSanta = santa;
         mapa.ponerItemEnMapa(posAgente, AGENTE_ID);
-        mapa.ponerItemEnMapa(posSanta, SANTA_ID);
+        //mapa.ponerItemEnMapa(posSanta, SANTA_ID);
 
     }
 
