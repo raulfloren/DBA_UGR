@@ -86,7 +86,7 @@ public class ComunicacionSantaClaus extends Behaviour {
                         msgAgente.setContent(mensaje);
 
                         agenteSanta.send(msgAgente);
-                        agenteSanta.getGraficos().agregarTraza("Profesor envía " + (esValiente ? "ACCEPT_PROPOSAL" : "REJECT_PROPOSAL") + " a Alumno");
+                        agenteSanta.getGraficos().mensajeSanta(msgAgente.getContent(),"Profesor envía " + (esValiente ? "ACCEPT_PROPOSAL" : "REJECT_PROPOSAL") + " a Alumno");
                         this.estados = EstadosSantaClaus.ESPERANDO_SOLICITUD_COORDENADAS;
 
                     } else {
@@ -112,7 +112,7 @@ public class ComunicacionSantaClaus extends Behaviour {
                         msgAgente.setContent(mensaje);
 
                         agenteSanta.send(msgAgente);
-                        agenteSanta.getGraficos().agregarTraza("Profesor envía INFORM a Alumno");
+                        agenteSanta.getGraficos().mensajeSanta(msgAgente.getContent(), "Profesor envía INFORM a Alumno");
                         this.estados = EstadosSantaClaus.ESPERANDO_SALVADOR_NAVIDAD;
 
                     }
@@ -134,7 +134,7 @@ public class ComunicacionSantaClaus extends Behaviour {
                         msgAgente.setContent(mensaje);
 
                         agenteSanta.send(msgAgente);
-                        agenteSanta.getGraficos().agregarTraza("Profesor envía INFORM a Alumno");
+                        agenteSanta.getGraficos().mensajeSanta(msgAgente.getContent(), "Profesor envía INFORM a Alumno");
                         this.estados = EstadosSantaClaus.FIN_AGENTE;
 
                     }
@@ -153,8 +153,8 @@ public class ComunicacionSantaClaus extends Behaviour {
     }
 
     private boolean esValiente() {
-        //return true;
-        return (((int) (Math.random() * 11)) < 8);
+        return true;
+        //return (((int) (Math.random() * 11)) < 8);
     }
 
     @Override

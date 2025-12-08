@@ -12,7 +12,7 @@ import entorno.Entorno;
 public class ComunicacionAgente extends Behaviour {
 
     private final Entorno entorno;
-    private final int RENO_ID;
+    private final int RENO_ID, SANTA_ID;
 
     private final String CONVERSACION_AGENTE_ELFO_ID = "salvador-elfo-conversacion";
     private String CODIGO_SECRETO_SANTA_CONVERSACION_ID;
@@ -27,6 +27,7 @@ public class ComunicacionAgente extends Behaviour {
     public ComunicacionAgente(Agente agent) {
         super(agent);
         this.RENO_ID = -5;
+        this.SANTA_ID = -3;
         this.agenteSalvador = agent;
         this.entorno = this.agenteSalvador.getSensores().getEntorno();
         this.estados = EstadosAgente.INICIO_MISION_SALVAR_NAVIDAD;
@@ -78,7 +79,7 @@ public class ComunicacionAgente extends Behaviour {
                 msgElfo.setContent(mensaje);
                 msgElfo.setConversationId(CONVERSACION_AGENTE_ELFO_ID);
                 agenteSalvador.send(msgElfo);
-                agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                 this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_1;
             }
@@ -101,7 +102,7 @@ public class ComunicacionAgente extends Behaviour {
                         msgSanta.setContent(mensaje);
 
                         agenteSalvador.send(msgSanta);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía PROPOSE al Profesor");
+                        agenteSalvador.getGUI().mensajeAgente(msgSanta.getContent(), "Alumno envía PROPOSE al Profesor");
                         estados = EstadosAgente.ESPERANDO_CONFIRMACION_SANTA;
 
                     } else {
@@ -130,7 +131,7 @@ public class ComunicacionAgente extends Behaviour {
                         msgElfo.setLanguage("Fines");
                         msgElfo.setContent(mensaje);
                         agenteSalvador.send(msgElfo);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                        agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                         this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_2;
                     }
@@ -164,7 +165,7 @@ public class ComunicacionAgente extends Behaviour {
                         msgRudolph.setContent(mensaje);
 
                         agenteSalvador.send(msgRudolph);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía QUERY_REF a Alumno Empollon");
+                        agenteSalvador.getGUI().mensajeAgente(msgRudolph.getContent(), "Alumno envía QUERY_REF a Alumno Empollon");
                         this.estados = EstadosAgente.ESPERANDO_COORDENADAS_RENO_PERDIDO;
 
                     } else {
@@ -218,7 +219,7 @@ public class ComunicacionAgente extends Behaviour {
 
                 agenteSalvador.send(msgRudolph);
 
-                agenteSalvador.getGUI().agregarTraza("Agente solicita siguientes apuntes.");
+                agenteSalvador.getGUI().mensajeAgente(msgRudolph.getContent(), "Agente solicita siguientes apuntes.");
 
                 // Volvemos a esperar la respuesta
                 this.estados = EstadosAgente.ESPERANDO_COORDENADAS_RENO_PERDIDO;
@@ -249,7 +250,7 @@ public class ComunicacionAgente extends Behaviour {
                 msgElfo.setContent(mensaje);
                 msgElfo.setConversationId(CONVERSACION_AGENTE_ELFO_ID);
                 agenteSalvador.send(msgElfo);
-                agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                 this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_3;
             }
@@ -272,7 +273,7 @@ public class ComunicacionAgente extends Behaviour {
                         msgSanta.setContent(mensaje);
 
                         agenteSalvador.send(msgSanta);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Profesor");
+                        agenteSalvador.getGUI().mensajeAgente(msgSanta.getContent(), "Alumno envía REQUEST a Profesor");
 
                     } else {
                         System.out.println("No entiendo lo que me quieres decir");
@@ -303,7 +304,7 @@ public class ComunicacionAgente extends Behaviour {
                         msgElfo.setContent(mensaje);
                         agenteSalvador.send(msgElfo);
 
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                        agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                         this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_4;
                     }
@@ -327,6 +328,7 @@ public class ComunicacionAgente extends Behaviour {
                         int columna = Integer.parseInt(posicion[1]);
                         Posicion pos = new Posicion(fila, columna);
                         this.agenteSalvador.setNuevoObjetivo(pos);
+                        entorno.getMapa().ponerItemEnMapa(pos, SANTA_ID);
 
                     } else {
                         System.out.println("No entiendo lo que me quieres decir");
@@ -358,7 +360,7 @@ public class ComunicacionAgente extends Behaviour {
                 msgElfo.setContent(mensaje);
                 msgElfo.setConversationId(CONVERSACION_AGENTE_ELFO_ID);
                 agenteSalvador.send(msgElfo);
-                agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                 this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_5;
 
@@ -381,7 +383,7 @@ public class ComunicacionAgente extends Behaviour {
                         msgSanta.setContent(mensaje);
                         msgSanta.setConversationId(CODIGO_SECRETO_SANTA_CONVERSACION_ID);
                         agenteSalvador.send(msgSanta);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST al Profesor");
+                        agenteSalvador.getGUI().mensajeAgente(msgSanta.getContent(), "Alumno envía REQUEST al Profesor");
 
                         this.estados = EstadosAgente.ESPERANDO_HoHoHo;
 

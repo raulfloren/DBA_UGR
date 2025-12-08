@@ -88,7 +88,7 @@ public class ComunicacionElfoTraductor extends Behaviour {
                 msgAgente.setContent(mensajeTraducido);
 
                 agenteElfo.send(msgAgente);
-                agenteElfo.getGraficos().agregarTraza("Delegado envía INFORM a Alumno");
+                agenteElfo.getGraficos().mensajeElfo(msgAgente.getContent(), "Delegado envía INFORM a Alumno");
 
             }
         } else {
