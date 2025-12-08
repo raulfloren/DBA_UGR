@@ -70,7 +70,7 @@ public class ComunicacionElfoTraductor extends Behaviour {
                 switch (idioma.toUpperCase().trim()) {
                     case "GENZ" -> // GENZ-FINES
                     {
-                        agenteElfo.getGraficos().agregarTraza("Traduciendo a Fines");
+                        agenteElfo.getGraficos().agregarTraza("Traduciendo a Castellano Formal");
                         mensajeTraducido = GestorComunicaciones.traduceAgente_SantaClaus(msgAgente.getContent());
 
                     }
@@ -88,7 +88,7 @@ public class ComunicacionElfoTraductor extends Behaviour {
                 msgAgente.setContent(mensajeTraducido);
 
                 agenteElfo.send(msgAgente);
-                agenteElfo.getGraficos().agregarTraza("Elfo traductor envía INFORM a Agente");
+                agenteElfo.getGraficos().agregarTraza("Delegado envía INFORM a Alumno");
 
             }
         } else {

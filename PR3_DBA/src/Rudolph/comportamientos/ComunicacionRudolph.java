@@ -61,7 +61,7 @@ public class ComunicacionRudolph extends Behaviour {
     @Override
     public void action() {
 
-        String mensaje = "Bro, no quedan renos perdidos. En plan.";
+        String mensaje = "Bro, no quedan mas apuntes. En plan.";
 
         switch (estados) {
             // Esperando a que el agente pida coordenadas
@@ -76,7 +76,7 @@ public class ComunicacionRudolph extends Behaviour {
                         if (!msgAgente.getConversationId().equals(CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD)) {      // Si no es el codigo correcto
                             msgAgente = msgAgente.createReply(ACLMessage.NOT_UNDERSTOOD);
                             msgAgente.setContent("Bro, que me esta contando. En plan.");
-                            agenteRudolph.getGraficos().agregarTraza("Rudolph envia NOT_UNDERSTOOD a Agente");
+                            agenteRudolph.getGraficos().agregarTraza("Alumno Empollon envia NOT_UNDERSTOOD a Alumno");
 
                         } else { // Si el codigo es correcto
 
@@ -91,7 +91,7 @@ public class ComunicacionRudolph extends Behaviour {
 
                             // Comunica la posicion del reno a agente
                             msgAgente.setContent("Bro, acepto. Las coordenadas son: " + mensaje + ". En plan.");
-                            agenteRudolph.getGraficos().agregarTraza("Rudolph envia INFORM a Agente");
+                            agenteRudolph.getGraficos().agregarTraza("Alumno Empollon envia INFORM a Alumno");
 
                         }
 
@@ -114,7 +114,7 @@ public class ComunicacionRudolph extends Behaviour {
                 msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
                 msgAgente.setContent(mensaje);
                 agenteRudolph.send(msgAgente);
-                agenteRudolph.getGraficos().agregarTraza("Rudolph envia REFUSE a Agente");
+                agenteRudolph.getGraficos().agregarTraza("Alumno Empollon envia REFUSE a Alumno");
                 this.estados = EstadosRudolph.FIN_AGENTE;
 
             }
