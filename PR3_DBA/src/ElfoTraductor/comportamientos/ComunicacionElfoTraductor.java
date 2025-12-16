@@ -58,41 +58,63 @@ public class ComunicacionElfoTraductor extends Behaviour {
 
         msgAgente = agenteElfo.blockingReceive(); //  Espera el mensaje del agente
 
-        if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) { // Mensaje del agente debe ser REQUEST
+        if (msgAgente != null) {
 
-            if (!msgAgente.getSender().equals(agente)) { // Solo me puede enviar el agente
-                System.out.println("No me comunico contigo");
-            } else {
+            if (msgAgente.getPerformative() == ACLMessage.REQUEST
+                    && msgAgente.getSender().equals(agente)) {
+
                 // El mensaje puede estar en dos idiomas, genz o fines, y quiero traducirlo al otro
-
                 String idioma = msgAgente.getLanguage();
+                boolean idiomaValido = false;
+                if (idioma != null) {
+                    switch (idioma.toUpperCase().trim()) {
+                        case "GENZ" -> // GENZ-FINES
+                        {
+                            agenteElfo.getGraficos().agregarTraza("Traduciendo a Fines");
+                            mensajeTraducido = GestorComunicaciones.traduceAgente_SantaClaus(msgAgente.getContent());
+                            idiomaValido = true;
 
-                switch (idioma.toUpperCase().trim()) {
-                    case "GENZ" -> // GENZ-FINES
-                    {
-                        agenteElfo.getGraficos().agregarTraza("Traduciendo a Castellano Formal");
-                        mensajeTraducido = GestorComunicaciones.traduceAgente_SantaClaus(msgAgente.getContent());
-
-                    }
-                    case "FINES" -> // FINES-GENZ
-                    {
-                        agenteElfo.getGraficos().agregarTraza("Traduciendo a GenZ");
-                        mensajeTraducido = GestorComunicaciones.traduceSantaClaus_Agente(msgAgente.getContent());
-                    }
-                    default -> {
+                        }
+                        case "FINES" -> // FINES-GENZ
+                        {
+                            agenteElfo.getGraficos().agregarTraza("Traduciendo a GenZ");
+                            mensajeTraducido = GestorComunicaciones.traduceSantaClaus_Agente(msgAgente.getContent());
+                            idiomaValido = true;
+                        }
+                        default -> {
+                            // No valido esl idima este
+                        }
                     }
                 }
 
-                // Enviar INFORM de vuelta al agente
-                msgAgente = msgAgente.createReply(ACLMessage.INFORM);
-                msgAgente.setContent(mensajeTraducido);
+                if (idiomaValido) {
+                    // Enviar INFORM de vuelta al agente
+                    msgAgente = msgAgente.createReply(ACLMessage.INFORM);
+                    msgAgente.setContent(mensajeTraducido);
 
-                agenteElfo.send(msgAgente);
-                agenteElfo.getGraficos().agregarTraza("Delegado envía INFORM a Alumno");
+                    agenteElfo.send(msgAgente);
+                    agenteElfo.getGraficos().mensajeElfo(msgAgente.getContent(), "Delegado envía INFORM a Alumno");
+                } else {
+                    // Si el idioma es null o no es uno de los esperados
+                    enviarNotUnderstood(msgAgente);
+                }
 
+            } else {
+                System.out.println("Error esperando REQUEST en: " + agenteElfo.getLocalName()); // Not understood
             }
-        } else {
-            System.out.println("Error esperando REQUEST en: " + agenteElfo.getLocalName()); // Not understood
+        }
+    }
+
+    /**
+     * Método para enviar un mensaje NOT_UNDERSTOOD
+     */
+    private void enviarNotUnderstood(ACLMessage msg) {
+        if (msg != null) {
+            System.out.println("Mensaje no entendido de: " + msg.getSender().getLocalName());
+            ACLMessage reply = msg.createReply();
+            reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+            reply.setContent("No he entendido tu mensaje");
+            agenteElfo.send(reply);
         }
     }
 

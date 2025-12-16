@@ -73,8 +73,10 @@ public class ComunicacionSantaClaus extends Behaviour {
 
                 msgAgente = agenteSanta.blockingReceive();
 
-                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.PROPOSE) {
-                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
+                if (msgAgente != null) {
+                    if (msgAgente.getPerformative() == ACLMessage.PROPOSE
+                            && msgAgente.getSender().equals(agente)
+                            && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
 
                         esValiente = esValiente();
                         mensaje = GestorComunicaciones.SantaClausConfirmaDigno(esValiente, CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD);
@@ -86,16 +88,15 @@ public class ComunicacionSantaClaus extends Behaviour {
                         msgAgente.setContent(mensaje);
 
                         agenteSanta.send(msgAgente);
-                        agenteSanta.getGraficos().agregarTraza("Profesor envía " + (esValiente ? "ACCEPT_PROPOSAL" : "REJECT_PROPOSAL") + " a Alumno");
+                        agenteSanta.getGraficos().mensajeSanta(msgAgente.getContent(), "Profesor envía " + (esValiente ? "ACCEPT_PROPOSAL" : "REJECT_PROPOSAL") + " a Alumno");
                         this.estados = EstadosSantaClaus.ESPERANDO_SOLICITUD_COORDENADAS;
 
                     } else {
 
-                        System.out.println("No comprendo");
+                        enviarNotUnderstood(msgAgente);
                     }
-                } else {
-                    System.out.println("No ha llegado nada");
                 }
+
             }
 
             // El agente ha encontrado todos los renos
@@ -103,8 +104,10 @@ public class ComunicacionSantaClaus extends Behaviour {
 
                 msgAgente = agenteSanta.blockingReceive();
 
-                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) {
-                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
+                if (msgAgente != null) {
+                    if (msgAgente.getPerformative() == ACLMessage.REQUEST
+                            && msgAgente.getSender().equals(agente)
+                            && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
                         // enviar nuestra coordenada
 
                         msgAgente = msgAgente.createReply(ACLMessage.INFORM);
@@ -112,7 +115,7 @@ public class ComunicacionSantaClaus extends Behaviour {
                         msgAgente.setContent(mensaje);
 
                         agenteSanta.send(msgAgente);
-                        agenteSanta.getGraficos().agregarTraza("Profesor envía INFORM a Alumno");
+                        agenteSanta.getGraficos().mensajeSanta(msgAgente.getContent(), "Profesor envía INFORM a Alumno");
                         this.estados = EstadosSantaClaus.ESPERANDO_SALVADOR_NAVIDAD;
 
                     }
@@ -125,8 +128,10 @@ public class ComunicacionSantaClaus extends Behaviour {
 
                 msgAgente = agenteSanta.blockingReceive();
 
-                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.REQUEST) {
-                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
+                if (msgAgente != null) {
+                    if (msgAgente.getPerformative() == ACLMessage.REQUEST
+                            && msgAgente.getSender().equals(agente)
+                            && GestorComunicaciones.isCorrectMensajeSantaClaus(msgAgente.getContent())) {
 
                         msgAgente = new ACLMessage(ACLMessage.INFORM);
                         mensaje = "Hyvää joulua, HoHoHo APROBASTE!!. Nähdään pian.";
@@ -134,9 +139,11 @@ public class ComunicacionSantaClaus extends Behaviour {
                         msgAgente.setContent(mensaje);
 
                         agenteSanta.send(msgAgente);
-                        agenteSanta.getGraficos().agregarTraza("Profesor envía INFORM a Alumno");
+                        agenteSanta.getGraficos().mensajeSanta(msgAgente.getContent(), "Profesor envía INFORM a Alumno");
                         this.estados = EstadosSantaClaus.FIN_AGENTE;
 
+                    } else {
+                        enviarNotUnderstood(msgAgente);
                     }
                 }
 
@@ -153,8 +160,21 @@ public class ComunicacionSantaClaus extends Behaviour {
     }
 
     private boolean esValiente() {
-        //return true;
-        return (((int) (Math.random() * 11)) < 8);
+        return true;
+        //return (((int) (Math.random() * 11)) < 8);
+    }
+
+    /**
+     * Método para enviar un mensaje NOT_UNDERSTOOD
+     */
+    private void enviarNotUnderstood(ACLMessage msg) {
+        if (msg != null) {
+            System.out.println("Mensaje no entendido de: " + msg.getSender().getLocalName());
+            ACLMessage reply = msg.createReply();
+            reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+            reply.setContent("No he entendido tu mensaje");
+            agenteSanta.send(reply);
+        }
     }
 
     @Override

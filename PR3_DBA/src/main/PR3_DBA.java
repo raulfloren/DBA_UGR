@@ -27,8 +27,8 @@ import java.util.ArrayList;
 public class PR3_DBA {
 
     public static void main(String[] args) {
-        if (args.length != 5) {
-            System.err.println("Prueba: <nombre_mapa> <agente_pos_x>  <agente_pos_y> <objectivo_pos_x>  <objectivo_pos_y>");
+        if (args.length < 7) {
+            System.err.println("Prueba: <nombre_mapa> <agente_pos_x>  <agente_pos_y> <santa_pos_x>  <santa_pos_y> <renoX, renoY ...>");
             return; // <-- Detener ejecución si faltan argumentos
         }
 
@@ -109,10 +109,16 @@ public class PR3_DBA {
             // --- Crear Rudolph ---
             ArrayList<Posicion> renosPerdidos = new ArrayList<>();
 
-            renosPerdidos.add(new Posicion(1, 1));
-            renosPerdidos.add(new Posicion(1, 8));
-            renosPerdidos.add(new Posicion(8, 1));
-            renosPerdidos.add(new Posicion(8, 8));
+            // --- Crear posiciones renos ---
+            for (int i = 5; i < args.length; i += 2) {
+                int renoX = Integer.parseInt(args[i]);
+                int renoY = Integer.parseInt(args[i + 1]);
+                renosPerdidos.add(new Posicion(renoY, renoX));
+            }
+
+            for (Posicion p : renosPerdidos) {
+                System.out.println("Pos reno: " + p.getColumna() + ", " + p.getFila());
+            }
 
             Object[] argsRudolph = new Object[]{GUI, renosPerdidos};
 

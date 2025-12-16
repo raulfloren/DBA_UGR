@@ -12,7 +12,7 @@ import entorno.Entorno;
 public class ComunicacionAgente extends Behaviour {
 
     private final Entorno entorno;
-    private final int RENO_ID;
+    private final int RENO_ID, SANTA_ID;
 
     private final String CONVERSACION_AGENTE_ELFO_ID = "salvador-elfo-conversacion";
     private String CODIGO_SECRETO_SANTA_CONVERSACION_ID;
@@ -27,6 +27,7 @@ public class ComunicacionAgente extends Behaviour {
     public ComunicacionAgente(Agente agent) {
         super(agent);
         this.RENO_ID = -5;
+        this.SANTA_ID = -3;
         this.agenteSalvador = agent;
         this.entorno = this.agenteSalvador.getSensores().getEntorno();
         this.estados = EstadosAgente.INICIO_MISION_SALVAR_NAVIDAD;
@@ -78,7 +79,7 @@ public class ComunicacionAgente extends Behaviour {
                 msgElfo.setContent(mensaje);
                 msgElfo.setConversationId(CONVERSACION_AGENTE_ELFO_ID);
                 agenteSalvador.send(msgElfo);
-                agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                 this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_1;
             }
@@ -101,17 +102,16 @@ public class ComunicacionAgente extends Behaviour {
                         msgSanta.setContent(mensaje);
 
                         agenteSalvador.send(msgSanta);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía PROPOSE al Profesor");
+                        agenteSalvador.getGUI().mensajeAgente(msgSanta.getContent(), "Alumno envía PROPOSE al Profesor");
                         estados = EstadosAgente.ESPERANDO_CONFIRMACION_SANTA;
 
                     } else {
-                        System.out.println("No entiendo lo que me quieres decir");
+                        enviarNotUnderstood(msgElfo);
                     }
                 } else {
-                    System.out.println("Error esperando INFORM en: " + agenteSalvador.getLocalName());
+                    enviarNotUnderstood(msgElfo);
                 }
 
-                this.estados = EstadosAgente.ESPERANDO_CONFIRMACION_SANTA;
             }
 
             // Esperamos la contestacion del proposal de santa y lo enviamos a traducir si es ACCEPT
@@ -119,9 +119,10 @@ public class ComunicacionAgente extends Behaviour {
 
                 msgSanta = agenteSalvador.blockingReceive();
 
-                if (msgSanta != null && msgSanta.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-
-                    if (msgSanta.getSender().equals(santaClaus) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgSanta.getContent())) {
+                if (msgSanta != null) {
+                    if (msgSanta.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
+                            && msgSanta.getSender().equals(santaClaus)
+                            && GestorComunicaciones.isCorrectMensajeSantaClaus(msgSanta.getContent())) {
 
                         mensaje = msgSanta.getContent();
 
@@ -130,13 +131,16 @@ public class ComunicacionAgente extends Behaviour {
                         msgElfo.setLanguage("Fines");
                         msgElfo.setContent(mensaje);
                         agenteSalvador.send(msgElfo);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                        agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                         this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_2;
-                    }
-                } else if (msgSanta != null && msgSanta.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-                    if (msgSanta.getSender().equals(santaClaus) && GestorComunicaciones.isCorrectMensajeSantaClaus(msgSanta.getContent())) {
+
+                    } else if (msgSanta.getPerformative() == ACLMessage.REJECT_PROPOSAL
+                            && msgSanta.getSender().equals(santaClaus)
+                            && GestorComunicaciones.isCorrectMensajeSantaClaus(msgSanta.getContent())) {
                         agenteSalvador.doDelete();
+                    } else {
+                        enviarNotUnderstood(msgSanta);
                     }
                 }
             }
@@ -164,14 +168,14 @@ public class ComunicacionAgente extends Behaviour {
                         msgRudolph.setContent(mensaje);
 
                         agenteSalvador.send(msgRudolph);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía QUERY_REF a Alumno Empollon");
+                        agenteSalvador.getGUI().mensajeAgente(msgRudolph.getContent(), "Alumno envía QUERY_REF a Alumno Empollon");
                         this.estados = EstadosAgente.ESPERANDO_COORDENADAS_RENO_PERDIDO;
 
                     } else {
-                        System.out.println("No entiendo lo que me quieres decir");
+                        enviarNotUnderstood(msgElfo);
                     }
                 } else {
-                    System.out.println("Error esperando INFORM en: " + agenteSalvador.getLocalName());
+                    enviarNotUnderstood(msgElfo);
                 }
 
             }
@@ -180,9 +184,12 @@ public class ComunicacionAgente extends Behaviour {
             case ESPERANDO_COORDENADAS_RENO_PERDIDO -> {
                 msgRudolph = agenteSalvador.blockingReceive();
 
-                if (msgRudolph != null && msgRudolph.getPerformative() == ACLMessage.INFORM) // Mensaje correcto, es un inform
-                {
-                    if (msgRudolph.getSender().equals(rudolph) && GestorComunicaciones.isCorrectMensajeAgente(msgRudolph.getContent())) {
+                if (msgRudolph != null) {
+
+                    if (msgRudolph.getPerformative() == ACLMessage.INFORM
+                            && msgRudolph.getSender().equals(rudolph)
+                            && GestorComunicaciones.isCorrectMensajeAgente(msgRudolph.getContent())) {
+
                         // QUEDAN RENOS
                         // PROCESADO DE COORDENADAS,  En el mensaje está la coordenada
                         mensaje = GestorComunicaciones.obtenerCoordenadasMensaje(msgRudolph.getContent());
@@ -198,13 +205,14 @@ public class ComunicacionAgente extends Behaviour {
 
                         this.estados = EstadosAgente.BUSCANDO_RENOS_PERDIDOS;
 
-                    }
-                } else if (msgRudolph != null && msgRudolph.getPerformative() == ACLMessage.REFUSE) { // No quedan renos
-                    System.out.println("HE ENCONTRADO TODOS LOS APUNTES");
-                    this.estados = EstadosAgente.SOLICITAR_COORDENADAS_SANTA;
-                } else { // Para cualquier otro caso, que no sea inform o refuse, volvemos a pedir las coordenadas.
-                    this.estados = EstadosAgente.SOLICITAR_NUEVA_COORDENADA_RENO;
+                    } else if (msgRudolph.getPerformative() == ACLMessage.REFUSE) { // No quedan renos
+                        System.out.println("HE ENCONTRADO TODOS LOS APUNTES");
+                        this.estados = EstadosAgente.SOLICITAR_COORDENADAS_SANTA;
+                    } else { // Para cualquier otro caso, que no sea inform o refuse, volvemos a pedir las coordenadas.
+                        enviarNotUnderstood(msgRudolph);
+                        this.estados = EstadosAgente.SOLICITAR_NUEVA_COORDENADA_RENO;
 
+                    }
                 }
             }
 
@@ -218,7 +226,7 @@ public class ComunicacionAgente extends Behaviour {
 
                 agenteSalvador.send(msgRudolph);
 
-                agenteSalvador.getGUI().agregarTraza("Agente solicita siguientes apuntes.");
+                agenteSalvador.getGUI().mensajeAgente(msgRudolph.getContent(), "Agente solicita siguientes apuntes.");
 
                 // Volvemos a esperar la respuesta
                 this.estados = EstadosAgente.ESPERANDO_COORDENADAS_RENO_PERDIDO;
@@ -249,7 +257,7 @@ public class ComunicacionAgente extends Behaviour {
                 msgElfo.setContent(mensaje);
                 msgElfo.setConversationId(CONVERSACION_AGENTE_ELFO_ID);
                 agenteSalvador.send(msgElfo);
-                agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                 this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_3;
             }
@@ -272,13 +280,13 @@ public class ComunicacionAgente extends Behaviour {
                         msgSanta.setContent(mensaje);
 
                         agenteSalvador.send(msgSanta);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Profesor");
+                        agenteSalvador.getGUI().mensajeAgente(msgSanta.getContent(), "Alumno envía REQUEST a Profesor");
 
                     } else {
-                        System.out.println("No entiendo lo que me quieres decir");
+                        enviarNotUnderstood(msgElfo);
                     }
                 } else {
-                    System.out.println("Error esperando INFORM en: " + agenteSalvador.getLocalName());
+                    enviarNotUnderstood(msgElfo);
                 }
 
                 this.estados = EstadosAgente.ESPERANDO_COORDENADAS_SANTA;
@@ -303,10 +311,14 @@ public class ComunicacionAgente extends Behaviour {
                         msgElfo.setContent(mensaje);
                         agenteSalvador.send(msgElfo);
 
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                        agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                         this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_4;
+                    } else {
+                        enviarNotUnderstood(msgSanta);
                     }
+                } else {
+                    enviarNotUnderstood(msgSanta);
                 }
             }
 
@@ -327,20 +339,22 @@ public class ComunicacionAgente extends Behaviour {
                         int columna = Integer.parseInt(posicion[1]);
                         Posicion pos = new Posicion(fila, columna);
                         this.agenteSalvador.setNuevoObjetivo(pos);
+                        entorno.getMapa().ponerItemEnMapa(pos, SANTA_ID);
+
+                        this.estados = EstadosAgente.YENDO_A_SANTA;
 
                     } else {
-                        System.out.println("No entiendo lo que me quieres decir");
+                        enviarNotUnderstood(msgElfo);
                     }
                 } else {
-                    System.out.println("Error esperando INFORM en: " + agenteSalvador.getLocalName());
+                    enviarNotUnderstood(msgElfo);
                 }
-
-                this.estados = EstadosAgente.YENDO_A_SANTA;
             }
 
             // Yendo a santa
             case YENDO_A_SANTA -> {
-                if (this.agenteSalvador.getPosAgente().equals(this.agenteSalvador.getPosObjetivoAnterior())) {
+                //if (this.agenteSalvador.getPosAgente().equals(this.agenteSalvador.getPosObjetivoAnterior())) {
+                if (this.agenteSalvador.getPosObjetivo() == null) {
                     System.out.println("HABEMOS PRESENTADO AL EXAMEN");
                     this.estados = EstadosAgente.PEDIR_HoHoHo;
                 }
@@ -358,7 +372,7 @@ public class ComunicacionAgente extends Behaviour {
                 msgElfo.setContent(mensaje);
                 msgElfo.setConversationId(CONVERSACION_AGENTE_ELFO_ID);
                 agenteSalvador.send(msgElfo);
-                agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST a Delegado");
+                agenteSalvador.getGUI().mensajeAgente(msgElfo.getContent(), "Alumno envía REQUEST a Delegado");
 
                 this.estados = EstadosAgente.ESPERANDO_TRADUCCION_ELFO_5;
 
@@ -381,15 +395,15 @@ public class ComunicacionAgente extends Behaviour {
                         msgSanta.setContent(mensaje);
                         msgSanta.setConversationId(CODIGO_SECRETO_SANTA_CONVERSACION_ID);
                         agenteSalvador.send(msgSanta);
-                        agenteSalvador.getGUI().agregarTraza("Alumno envía REQUEST al Profesor");
+                        agenteSalvador.getGUI().mensajeAgente(msgSanta.getContent(), "Alumno envía REQUEST al Profesor");
 
                         this.estados = EstadosAgente.ESPERANDO_HoHoHo;
 
                     } else {
-                        System.out.println("No entiendo lo que me quieres decir");
+                        enviarNotUnderstood(msgElfo);
                     }
                 } else {
-                    System.out.println("Error esperando INFORM en: " + agenteSalvador.getLocalName());
+                    enviarNotUnderstood(msgElfo);
                 }
             }
 
@@ -403,22 +417,33 @@ public class ComunicacionAgente extends Behaviour {
 
                         System.out.println(msgSanta.getContent());
                         this.agenteSalvador.haSalvadoElCuatri();
+                    } else {
+                        enviarNotUnderstood(msgSanta);
                     }
+                } else {
+                    enviarNotUnderstood(msgSanta);
                 }
 
                 this.estados = EstadosAgente.WAIT;
             }
 
-            case WAIT -> {
-                msgRudolph = agenteSalvador.blockingReceive();
-
-            }
-
             default -> {
-
             }
         }
 
+    }
+
+    /**
+     * Método para enviar un mensaje NOT_UNDERSTOOD
+     */
+    private void enviarNotUnderstood(ACLMessage msg) {
+        if (msg != null) {
+            System.out.println("Mensaje no entendido de: " + msg.getSender().getLocalName());
+            ACLMessage reply = msg.createReply();
+            reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+            reply.setContent("No he entendido tu mensaje");
+            agenteSalvador.send(reply);
+        }
     }
 
     @Override
