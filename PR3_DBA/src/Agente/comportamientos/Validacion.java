@@ -22,16 +22,19 @@ public class Validacion extends Behaviour {
         actualizar el entorno (cambio poscion agente)
         y mover agente en la gui
          */
+        // Pausar la simulación para poder verla
+        //agente.getGUI().esperarInputUsuario();
 
         if (agente.getPosObjetivo() != null) {
 
-            // Pausar la simulación para poder verla
+            // Ejecución automatica de la simulacion
+            
             try {
-                Thread.sleep(300);
+                Thread.sleep(50);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Validacion.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+             
             entorno.setPosAgente(agente.getPosAgente(), agente.getPosAnterior());
             agente.imprimirMemoria();
             agente.getGUI().actualizarMatriz(entorno.getMapa().getMapa(), agente.getMovDecidido());
@@ -41,7 +44,7 @@ public class Validacion extends Behaviour {
                     agente.getPosAgente().getFila(), agente.getPosAgente().getColumna(),
                     agente.getMovDecidido(), agente.getSensores().getEnergia());
 
-            //agente.getGUI().agregarTraza(traza);
+            agente.getGUI().agregarTraza(traza);
             if (this.agente.objetivoEncontrado()) {
                 this.agente.notificarRenoEncontrado();
                 this.agente.cleanMemoria();

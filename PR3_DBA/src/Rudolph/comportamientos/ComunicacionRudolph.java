@@ -12,7 +12,6 @@ import jade.lang.acl.ACLMessage;
 public class ComunicacionRudolph extends Behaviour {
 
     private final String CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD = "Profee, apruebanos.";
-    private final String CONVERSACION_AGENTE_RUDOLPH_ID = "salvador-rudolph-conversacion";
 
     private final Rudolph agenteRudolph;
     private EstadosRudolph estados;
@@ -69,40 +68,38 @@ public class ComunicacionRudolph extends Behaviour {
 
                 msgAgente = agenteRudolph.blockingReceive();
 
-                if (msgAgente != null && msgAgente.getPerformative() == ACLMessage.QUERY_REF) {
+                if (msgAgente != null) {
+                    // Comprobamos Performativa, Emisor, Contenido correcto y ConversationID correcto
+                    if (msgAgente.getPerformative() == ACLMessage.QUERY_REF
+                            && msgAgente.getSender().equals(agente)
+                            && GestorComunicaciones.isCorrectMensajeAgente(msgAgente.getContent())
+                            && msgAgente.getConversationId().equals(CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD)) {
 
-                    if (msgAgente.getSender().equals(agente) && GestorComunicaciones.isCorrectMensajeAgente(msgAgente.getContent())) {
+                        // Quedan coordenadas y codigo de converasion correcto
+                        // Obtiene la posicion de un reno perdido
+                        ACLMessage reply = msgAgente.createReply(ACLMessage.INFORM);
 
-                        if (!msgAgente.getConversationId().equals(CLAVE_SECRETA_PARA_SALVAR_LA_NAVIDAD)) {      // Si no es el codigo correcto
-                            msgAgente = msgAgente.createReply(ACLMessage.NOT_UNDERSTOOD);
-                            msgAgente.setContent("Bro, que me esta contando. En plan.");
-                            agenteRudolph.getGraficos().mensajeRudolph(msgAgente.getContent(), "Alumno Empollon envia NOT_UNDERSTOOD a Alumno");
+                        Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
+                        agenteRudolph.getPosRenosPerdidos().removeFirst();
 
-                        } else { // Si el codigo es correcto
+                        String coordenadas = "[" + pos.getFila() + "," + pos.getColumna() + "]";
 
-                            // Quedan coordenadas y codigo de converasion correcto
-                            // Obtiene la posicion de un reno perdido
-                            msgAgente = msgAgente.createReply(ACLMessage.INFORM);
+                        // Comunica la posicion del reno a agente
+                        reply.setContent("Bro, acepto. Las coordenadas son: " + coordenadas + ". En plan.");
 
-                            Posicion pos = new Posicion(agenteRudolph.getPosRenosPerdidos().getFirst());
-                            agenteRudolph.getPosRenosPerdidos().removeFirst();
+                        agenteRudolph.send(reply);
+                        agenteRudolph.getGraficos().mensajeRudolph(reply.getContent(), "Alumno Empollon envia INFORM a Alumno");
 
-                            mensaje = "[" + pos.getFila() + "," + pos.getColumna() + "]";
-
-                            // Comunica la posicion del reno a agente
-                            msgAgente.setContent("Bro, acepto. Las coordenadas son: " + mensaje + ". En plan.");
-                            agenteRudolph.getGraficos().mensajeRudolph(msgAgente.getContent(), "Alumno Empollon envia INFORM a Alumno");
-                        }
-
-                        agenteRudolph.send(msgAgente);
-
-                        if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {     // No quedan coordenadas
+                        // Comprobar si ya no quedan más renos para cambiar de estado
+                        if (agenteRudolph.getPosRenosPerdidos().isEmpty()) {
                             this.estados = EstadosRudolph.HA_SALVADO_LA_NAVIDAD;
                         }
 
+                    } else {
+                        // Si falla el emisor, el contenido, el ID de conversación o la performativa
+                        enviarNotUnderstood(msgAgente);
                     }
                 }
-
             }
 
             // El agente ha econtrado todos los renos
@@ -110,13 +107,26 @@ public class ComunicacionRudolph extends Behaviour {
 
                 msgAgente = agenteRudolph.blockingReceive();
 
-                msgAgente = msgAgente.createReply(ACLMessage.REFUSE);
-                msgAgente.setContent(mensaje);
-                agenteRudolph.send(msgAgente);
-                agenteRudolph.getGraficos().agregarTraza("Alumno Empollon envia REFUSE a Alumno");
-                agenteRudolph.getGraficos().mensajeRudolph(mensaje, "Alumno Empollon envia REFUSE a Alumno");
-                this.estados = EstadosRudolph.FIN_AGENTE;
+                if (msgAgente != null) {
+                    // Solo contestamos con REFUSE si es una petición válida del Agente Salvador
+                    if (msgAgente.getPerformative() == ACLMessage.QUERY_REF
+                            && msgAgente.getSender().equals(agente)) {
 
+                        ACLMessage reply = msgAgente.createReply();
+                        reply.setPerformative(ACLMessage.REFUSE);
+                        reply.setContent(mensaje);
+
+                        agenteRudolph.send(reply);
+
+                        agenteRudolph.getGraficos().agregarTraza("Alumno Empollon envia REFUSE a Alumno");
+                        agenteRudolph.getGraficos().mensajeRudolph(mensaje, "Alumno Empollon envia REFUSE a Alumno");
+
+                        this.estados = EstadosRudolph.FIN_AGENTE;
+                    } else {
+                        // Si nos habla otro o nos dicen algo raro
+                        enviarNotUnderstood(msgAgente);
+                    }
+                }
             }
 
             // Fin agente
@@ -130,6 +140,19 @@ public class ComunicacionRudolph extends Behaviour {
 
         }
 
+    }
+
+    /**
+     * Método para enviar un mensaje NOT_UNDERSTOOD
+     */
+    private void enviarNotUnderstood(ACLMessage msg) {
+        if (msg != null) {
+            System.out.println("Mensaje no entendido de: " + msg.getSender().getLocalName());
+            ACLMessage reply = msg.createReply();
+            reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+            reply.setContent("No he entendido tu mensaje");
+            agenteRudolph.send(reply);
+        }
     }
 
     @Override
